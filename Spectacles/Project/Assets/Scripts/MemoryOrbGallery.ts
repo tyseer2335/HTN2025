@@ -274,6 +274,7 @@ interface MemoryData {
   storyboard: Storyboard;
   createdAt: Date;
   thumbnailUrl: string;
+  generatedIconUrl?: string; // AI-generated icon for the memory orb
 }
 
 interface Storyboard {

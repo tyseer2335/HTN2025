@@ -118,11 +118,12 @@ export class MemoryOrb extends BaseScriptComponent {
       this.titleText.text = memory.title;
     }
 
-    // Set thumbnail if available
-    if (this.thumbnailImage && memory.thumbnailUrl) {
-      // In a real implementation, you would load the texture from the URL
-      // For now, we'll use a placeholder approach
-      this.loadThumbnailFromUrl(memory.thumbnailUrl);
+    // Set generated icon or fallback to thumbnail
+    if (this.thumbnailImage) {
+      const iconUrl = memory.storyboard?.generatedIconUrl || memory.generatedIconUrl || memory.thumbnailUrl;
+      if (iconUrl) {
+        this.loadThumbnailFromUrl(iconUrl);
+      }
     }
 
     // Set orb color based on memory theme

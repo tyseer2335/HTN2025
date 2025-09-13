@@ -221,6 +221,15 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
         // Generate enhanced title
         generatedTitle = await GeminiService.enhanceMemoryTitle(blurb);
 
+        // Generate icon for the memory orb
+        try {
+          const memoryIcon = await GeminiService.generateMemoryIcon(enhancedStoryboard.iconCategory);
+          enhancedStoryboard.generatedIconUrl = memoryIcon;
+          console.log(`✅ Memory icon generated for "${enhancedStoryboard.iconCategory}"`);
+        } catch (iconError) {
+          console.error('❌ Icon generation failed:', iconError.message);
+        }
+
         // Generate images for each panel
         const panelKeys = ['p1', 'p2', 'p3', 'p4', 'p5'];
         for (let i = 0; i < panelKeys.length; i++) {
@@ -297,6 +306,35 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
   } catch (e) {
     console.error('Server error:', e?.message || e);
     return res.status(500).json({ error: 'server_error', message: e?.message || 'unknown' });
+  }
+});
+
+// Test icon generation
+app.post('/api/generate-icon', async (req, res) => {
+  try {
+    const { iconCategory, theme = 'low-poly' } = req.body;
+
+    if (!iconCategory) {
+      return res.status(400).json({ error: 'iconCategory required' });
+    }
+
+    console.log(`🎨 Testing icon generation for "${iconCategory}"...`);
+    const iconUrl = await GeminiService.generateMemoryIcon(iconCategory, theme);
+
+    res.json({
+      success: true,
+      iconCategory,
+      theme,
+      iconUrl,
+      message: 'Icon generated successfully'
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      error: 'Icon generation failed',
+      details: error.message,
+      iconCategory: req.body?.iconCategory
+    });
   }
 });
 
