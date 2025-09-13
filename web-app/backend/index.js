@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
+import { saveMemory, getAllMemories, getUserMemories, getMemoryById, getMemoryStats } from './db.js';
 
 const app = express();
 app.use(cors());
@@ -47,8 +48,53 @@ function buildMessage(blurb, dataUrls) {
   return [{ role: 'user', content: [textBlock, ...imageBlocks] }];
 }
 
-// Health
-app.get('/api/ping', (_req, res) => res.json({ ok: true }));
+// Health check with MongoDB status
+app.get('/api/ping', async (_req, res) => {
+  try {
+    const stats = await getMemoryStats();
+    res.json({ ok: true, mongodb: stats });
+  } catch (error) {
+    res.json({ ok: true, mongodb: { status: 'disconnected', error: error.message } });
+  }
+});
+
+// Get all memories (for Spectacles sync)
+app.get('/api/memories', async (req, res) => {
+  try {
+    const { userId = 'anonymous', limit = 20 } = req.query;
+    const memories = await getUserMemories(userId, parseInt(limit));
+
+    // Format for Spectacles consumption
+    const spectaclesFormat = memories.map(memory => ({
+      id: memory.id || memory._id.toString(),
+      title: memory.title || 'Untitled Memory',
+      description: memory.description,
+      theme: memory.theme || 'watercolor',
+      storyboard: memory.storyboard,
+      createdAt: memory.createdAt,
+      thumbnailUrl: memory.storyboard?.panels?.[0]?.generatedImageUrl || null
+    }));
+
+    res.json(spectaclesFormat);
+  } catch (error) {
+    console.error('Get memories error:', error);
+    res.status(500).json({ error: 'Failed to fetch memories' });
+  }
+});
+
+// Get specific memory
+app.get('/api/memories/:id', async (req, res) => {
+  try {
+    const memory = await getMemoryById(req.params.id);
+    if (!memory) {
+      return res.status(404).json({ error: 'Memory not found' });
+    }
+    res.json(memory);
+  } catch (error) {
+    console.error('Get memory error:', error);
+    res.status(500).json({ error: 'Failed to get memory' });
+  }
+});
 
 /**
  * POST /api/storyboard
@@ -104,7 +150,44 @@ app.post('/api/storyboard', upload.array('images', 3), async (req, res) => {
     try {
       const storyboard = JSON.parse(text);
       console.log('Storyboard JSON:\n', JSON.stringify(storyboard, null, 2)); // prints on server
-      return res.json(storyboard); // returns to frontend
+
+      // Save to MongoDB
+      try {
+        const memoryData = {
+          id: `memory_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          userId: 'anonymous', // Can be updated when auth is added
+          title: storyboard.title || `Memory from ${new Date().toLocaleDateString()}`,
+          description: blurb,
+          theme: 'watercolor', // Default theme
+          storyboard: storyboard,
+          originalImages: dataUrls.length, // Store count instead of actual URLs for size
+          metadata: {
+            aiModel: 'cohere-aya-vision',
+            processingTime: Date.now(),
+            version: '1.0'
+          }
+        };
+
+        const savedMemory = await saveMemory(memoryData);
+        console.log('💾 Memory saved to MongoDB:', savedMemory._id);
+
+        // Return enhanced response
+        return res.json({
+          ...storyboard,
+          memoryId: savedMemory._id,
+          saved: true
+        });
+
+      } catch (dbError) {
+        console.error('MongoDB save failed:', dbError);
+        // Still return the storyboard even if DB save fails
+        return res.json({
+          ...storyboard,
+          saved: false,
+          saveError: 'Database unavailable'
+        });
+      }
+
     } catch {
       console.log('Model returned non-JSON (preview):', text.slice(0, 200));
       return res.status(502).json({ error: 'invalid_json_from_model', preview: text.slice(0, 400) });
@@ -115,7 +198,40 @@ app.post('/api/storyboard', upload.array('images', 3), async (req, res) => {
   }
 });
 
+// Test endpoint for MongoDB
+app.post('/api/test-memory', async (req, res) => {
+  try {
+    const testMemory = {
+      id: `test_${Date.now()}`,
+      userId: 'test-user',
+      title: 'Test Memory',
+      description: 'This is a test memory to verify MongoDB connection',
+      theme: 'watercolor',
+      storyboard: {
+        storyId: 'test',
+        theme: 'watercolor',
+        panels: [
+          {
+            id: 'p1',
+            title: 'Test Panel',
+            description: 'Testing MongoDB integration',
+            keywords: ['test', 'mongodb', 'hackathon']
+          }
+        ]
+      }
+    };
+
+    const saved = await saveMemory(testMemory);
+    res.json({ success: true, message: 'MongoDB working!', memoryId: saved._id });
+  } catch (error) {
+    res.status(500).json({ error: 'MongoDB connection failed', details: error.message });
+  }
+});
+
 const PORT = process.env.PORT || 8787;
 app.listen(PORT, () => {
-  console.log(`Backend listening on http://localhost:${PORT}`);
+  console.log(`🚀 Memory Backend with MongoDB Atlas`);
+  console.log(`📡 Server: http://localhost:${PORT}`);
+  console.log(`🧪 Test: http://localhost:${PORT}/api/ping`);
+  console.log(`💾 MongoDB: ${process.env.MONGODB_URI ? 'Configured' : 'Not configured'}`);
 });
