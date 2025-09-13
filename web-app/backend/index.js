@@ -52,7 +52,7 @@ function buildMessage(blurb, dataUrls) {
       'Description quality (each panel):',
       '- 90–140 words with concrete visual details grounded in the photos.',
       '- Include: who is present, where (specific place/setting), when (time of day/season), objective/emotion, a small conflict/surprise/decision, sensory details, and composition cues (POV/shot, framing, motion).',
-      '- End p1–p4 with a forward hook. End p5 with a reflective line that ties back to the trip's theme.',
+      '- End p1–p4 with a forward hook. End p5 with a reflective line that ties back to the trip theme.',
       '',
       `TRIP BLURB: """${blurb}"""`,
     ].join('\n'),
