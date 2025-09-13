@@ -37,13 +37,16 @@ export class Snap3DInteractableFactory extends BaseScriptComponent {
   createInteractable3DObject(
     input: string,
     overridePosition?: vec3
-  ): Promise<string> {
+  ): Promise<SceneObject> {
     return new Promise((resolve, reject) => {
       if (!this.avaliableToRequest) {
         print("Already processing a request. Please wait.");
+        reject("Factory busy - already processing a request");
         return;
       }
       this.avaliableToRequest = false;
+
+      // Create the scene object first
       let outputObj = this.snap3DInteractablePrefab.instantiate(
         this.sceneObject
       );
@@ -76,7 +79,8 @@ export class Snap3DInteractableFactory extends BaseScriptComponent {
               if (!this.refineMesh) {
                 snap3DInteractable.setModel(assetOrError.gltfAsset, true);
                 this.avaliableToRequest = true;
-                resolve("Successfully created mesh with prompt: " + input);
+                print("Successfully created mesh with prompt: " + input);
+                resolve(outputObj); // Return the SceneObject
               } else {
                 snap3DInteractable.setModel(assetOrError.gltfAsset, false);
               }
@@ -84,13 +88,18 @@ export class Snap3DInteractableFactory extends BaseScriptComponent {
               assetOrError = assetOrError as Snap3DTypes.GltfAssetData;
               snap3DInteractable.setModel(assetOrError.gltfAsset, true);
               this.avaliableToRequest = true;
-              resolve("Successfully created mesh with prompt: " + input);
+              print("Successfully created mesh with prompt: " + input);
+              resolve(outputObj); // Return the SceneObject
             } else if (value === "failed") {
               assetOrError = assetOrError as Snap3DTypes.ErrorData;
               print("Error: " + assetOrError.errorMsg);
-              //snap3DInteractable.onFailure(assetOrError.errorMsg);
               this.avaliableToRequest = true;
-              reject("Failed to create mesh with prompt: " + input);
+              reject(
+                "Failed to create mesh with prompt: " +
+                  input +
+                  " - " +
+                  assetOrError.errorMsg
+              );
             }
           });
         })
@@ -98,7 +107,7 @@ export class Snap3DInteractableFactory extends BaseScriptComponent {
           snap3DInteractable.onFailure(error);
           print("Error submitting task or getting status: " + error);
           this.avaliableToRequest = true;
-          reject("Failed to create mesh with prompt: " + input);
+          reject("Failed to create mesh with prompt: " + input + " - " + error);
         });
     });
   }

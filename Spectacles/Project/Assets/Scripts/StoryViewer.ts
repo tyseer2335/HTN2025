@@ -1,9 +1,9 @@
 import { PinchButton } from "SpectaclesInteractionKit.lspkg/Components/UI/PinchButton/PinchButton";
+import { Snap3DInteractableFactory } from "./Snap3DInteractableFactory";
 import { LSTween } from "LSTween.lspkg/LSTween";
-
 /**
- * StoryViewer - Phase 1: Initial Dot Implementation
- * Single dot appears at starting position when button is clicked
+ * StoryViewer - Phase 1: Initial Dot Implementation with HTTP Request
+ * Single dot appears at starting position when button is clicked, then fetches story data
  */
 @component
 export class StoryViewer extends BaseScriptComponent {
@@ -37,6 +37,23 @@ export class StoryViewer extends BaseScriptComponent {
   @hint("Optional: Material for button color changes")
   private buttonMaterial: Material;
   
+  // Internet Module for HTTP requests
+  @input
+  @hint("InternetModule asset for making HTTP requests")
+  private internetModule: InternetModule;
+  private statusDisplayTwo: Text; 
+  
+  // HTTP Request Settings
+  @ui.separator
+  @ui.label("API Configuration")
+  
+  @input
+  @hint("API endpoint URL to fetch story data from")
+  private apiEndpoint: string = "https://jsonplaceholder.typicode.com/posts/1";
+
+  @input
+  snap3DFactory: Snap3DInteractableFactory;
+    
   // Phase 1 Settings
   @ui.separator
   @ui.label("Phase 1 Configuration")
@@ -60,179 +77,184 @@ export class StoryViewer extends BaseScriptComponent {
   // Internal state
   private isAnimating: boolean = false;
   private currentTween: any = null;
+  private storyData: any = null;
+  private created3DObject: SceneObject = null;
+private rotationTween: LSTween = null;
+private rotationSpeed: number = 30; // degrees per second
+private updateEvent: UpdateEvent = null;
   
   onAwake() {
+    // Check internet availability first
+    if (global.deviceInfoSystem.isInternetAvailable()) {
+      print("StoryViewer: Internet is available");
+    } else {
+      print("StoryViewer: No internet connection");
+      if (this.statusDisplay) {
+        this.statusDisplay.text = "No internet connection";
+      }
+    }
+
+    // Listen for internet status changes
+    global.deviceInfoSystem.onInternetStatusChanged.add((args) => {
+      if (args.isInternetAvailable) {
+        print("StoryViewer: Internet connection restored");
+        if (this.statusDisplay && this.statusDisplay.text === "No internet connection") {
+          this.statusDisplay.text = "Ready";
+        }
+      } else {
+        print("StoryViewer: Internet connection lost");
+        if (this.statusDisplay) {
+          this.statusDisplay.text = "No internet connection";
+        }
+      }
+    });
+
     // attach onGenerateButtonPressed to generateButton
     this.createEvent("OnStartEvent").bind(() => {
-      
       // Set up button click handler
-      this.generateButton.onButtonPinched.add(() => {
-        this.onGenerateButtonPressed();
-      });
+      if (this.generateButton && this.generateButton.onButtonPinched) {
+        this.generateButton.onButtonPinched.add(() => {
+          this.onGenerateButtonPressed();
+        });
+      } else {
+        print("StoryViewer: generateButton not properly configured");
+      }
     });
-    
-    // ensure visuals start hidden
-    // if (this.initialDot) {
-    //   // this.initialDot.enabled = false;
-    //   this.initialDot.getTransform().setLocalScale(vec3.zero());
-    // }
-    // if (this.lineVisual) {
-    //   // this.lineVisual.enabled = false;
-    //   // assume line is scaled along X for length
-    //   this.lineVisual.getTransform().setLocalScale(new vec3(0.01,1,1));
-    // }
     
     if (this.buttonText) this.buttonText.text = "Start Story";
     if (this.statusDisplay) this.statusDisplay.text = "Ready";
   }
   
   private onGenerateButtonPressed() {
+    if (this.isAnimating) return; // Prevent multiple clicks
+    
+    // Check internet before starting
+    if (!global.deviceInfoSystem.isInternetAvailable()) {
+      print("StoryViewer: No internet connection available");
+      if (this.statusDisplay) {
+        this.statusDisplay.text = "No internet connection";
+      }
+      return;
+    }
+    
     this.startPhase1();
   }
   
   private startPhase1() {
     this.isAnimating = true;
-    print("StoryViewer: Starting Phase 1 - isAnimating set to true");
+    print("StoryViewer: Starting Phase 1 - fetching story data");
     
-    // visual feedback: disable further presses logically
-    if (this.buttonText) this.buttonText.text = "Generating...";
-    if (this.statusDisplay) this.statusDisplay.text = "Starting...";
+    // visual feedback
+    if (this.buttonText) this.buttonText.text = "Fetching Story...";
+    if (this.statusDisplay) this.statusDisplay.text = "Connecting to API...";
     
-    // compute starting world position (top of button)
-    let startWorldPos: vec3;
-    try {
-      const btnTransform = this.generateButton.sceneObject.getTransform();
-      startWorldPos = btnTransform.getWorldPosition().add(this.dotOffset);
-    } catch (e) {
-      // fallback to component transform
-      startWorldPos = this.getTransform().getWorldPosition().add(this.dotOffset);
-    }
-    
-    // show and animate dot
-    if (!this.initialDot) {
-      print("StoryViewer: initialDot not assigned");
-      this.completePhase1();
-      return;
-    }
-    
-    this.initialDot.getTransform().setWorldPosition(startWorldPos);
-    this.initialDot.getTransform().setLocalScale(vec3.zero());
-    this.initialDot.enabled = true;
-    if (this.statusDisplay) this.statusDisplay.text = "Dot appearing...";
-    
-     const durationMs = Math.max(1, this.dotAppearDuration * 1000);
-    
-    // First animate dot appearing (scale up)
-    this.currentTween = LSTween.scaleToLocal(
-      this.initialDot.getTransform(),
-      vec3.one(),
-      durationMs * 0.3 // 30% of duration for appearance
-    )
-      .onComplete(() => {
-        // After dot appears, animate bounce up
-        this.animateDotBounce(startWorldPos);
-      });
-    this.currentTween.start();
+    // Make HTTP request
+    this.fetchStoryData();
   }
 
-  private animateDotBounce(startWorldPos: vec3) {
-    if (!this.initialDot) {
+  private async fetchStoryData() {
+  try {
+    if (!this.internetModule) {
+      print("StoryViewer: InternetModule not configured");
+      if (this.statusDisplay) this.statusDisplay.text = "Configuration error";
       this.completePhase1();
       return;
     }
 
-    const bounceHeight = 0.1; // How high to bounce (in world units)
-    const bounceUpPos = startWorldPos.add(new vec3(0, bounceHeight, 0));
-    const bounceDuration = Math.max(1, this.dotAppearDuration * 500); // Half duration for bounce
+    const request = new Request(this.apiEndpoint, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-    // Animate bounce up
-    this.currentTween = LSTween.moveToWorld(
-      this.initialDot.getTransform(),
-      bounceUpPos,
-      bounceDuration
-    )
-      .onComplete(() => {
-        // Animate bounce down
-        this.currentTween = LSTween.moveToWorld(
-          this.initialDot.getTransform(),
-          startWorldPos,
-          bounceDuration
-        )
-          .onComplete(() => {
-            // After bounce, make dot disappear and start line if available
-            this.animateDotDisappear(startWorldPos);
-          });
-        this.currentTween.start();
-      });
-    this.currentTween.start();
+    const response = await this.internetModule.fetch(request);
+    
+    if (response.status === 200) {
+      const responseData = await response.json();
+      this.storyData = responseData;
+      
+      print("StoryViewer: Story data fetched successfully");
+      print("Story data: " + JSON.stringify(responseData));
+      
+      if (this.statusDisplay) this.statusDisplay.text = "Story loaded successfully!";
+      if (this.buttonText) this.buttonText.text = "Story Ready";
+
+      // print("Icon Category: " + responseData.stories[0].iconCategory);
+      // this.generate3DSnap(responseData.stories[0].iconCategory);
+
+      this.generate3DSnap(responseData.iconCategory);
+      
+      
+    } else {
+      print("StoryViewer: HTTP request failed with status: " + response.status);
+      if (this.statusDisplay) this.statusDisplay.text = "Failed to load story";
+      this.completePhase1();
+    }
+  } catch (error) {
+    print("StoryViewer: Error fetching story data: " + error);
+    if (this.statusDisplay) this.statusDisplay.text = "Network error";
+    this.completePhase1();
   }
+}
 
-  private animateDotDisappear(startWorldPos: vec3) {
-    if (!this.initialDot) {
-      this.completePhase1();
-      return;
+private async generate3DSnap(iconCategory: string) {
+  print("StoryViewer: Generating 3D object with icon category: " + iconCategory);
+  this.created3DObject = await this.snap3DFactory.createInteractable3DObject(
+    iconCategory,
+    this.generateButton.getTransform().getWorldPosition().add(this.dotOffset)
+  );
+    
+    
+    if (this.created3DObject) {
+      print("StoryViewer: 3D object created successfully, starting rotation");
+      this.startContinuousRotation(); // Add this line to start rotation
+    } else {
+      print("StoryViewer: Warning - 3D object creation failed");
     }
+  this.completePhase1();
+}
 
-    const disappearDuration = Math.max(1, this.dotAppearDuration * 300); // 30% of duration for disappearing
-
-    // Scale down to disappear
-    this.currentTween = LSTween.scaleToLocal(
-      this.initialDot.getTransform(),
-      vec3.zero(),
-      disappearDuration
-    )
-      .onComplete(() => {
-        // Hide the dot completely
-        this.initialDot.enabled = false;
-        
-        // After dot disappears, start line expansion if provided
-        if (this.lineVisual) {
-          this.animateLineFromDot(startWorldPos);
-        } else {
-          this.completePhase1();
-        }
-      });
-    this.currentTween.start();
+  private startContinuousRotation() {
+  if (!this.created3DObject) {
+    print("StoryViewer: No 3D object to rotate");
+    return;
   }
   
-  private animateLineFromDot(startWorldPos: vec3) {
-    if (!this.lineVisual) {
-      this.completePhase1();
-      return;
+  print("StoryViewer: Starting continuous rotation");
+  
+  // Create an update event that runs every frame
+  this.updateEvent = this.createEvent("UpdateEvent");
+  this.updateEvent.bind(() => {
+    if (this.created3DObject) {
+      const transform = this.created3DObject.getTransform();
+      const currentRotation = transform.getLocalRotation();
+      
+      // Calculate rotation increment based on frame time
+      const deltaTime = getDeltaTime();
+      const rotationIncrement = this.rotationSpeed * deltaTime * MathUtils.DegToRad;
+      
+      // Create new rotation (rotating around Y-axis)
+      const newRotationY = quat.angleAxis(rotationIncrement, vec3.up());
+      const finalRotation = currentRotation.multiply(newRotationY); // Use the multiply method on the quat instance
+      
+      transform.setLocalRotation(finalRotation);
     }
-    
-    // position line at dot (assumes line's pivot is at its left end)
-    const lineT = this.lineVisual.getTransform();
-    lineT.setWorldPosition(startWorldPos);
-    lineT.setLocalScale(new vec3(0.001, 1, 1));
-    this.lineVisual.enabled = true;
-    if (this.statusDisplay) this.statusDisplay.text = "Extending line...";
-    
-    const durationMs = Math.max(1, this.lineExpandDuration * 1000);
-    this.currentTween = LSTween.scaleToLocal(
-      lineT,
-      new vec3(this.lineTargetLength, 1, 1),
-      durationMs
-    )
-      .onComplete(() => {
-        if (this.statusDisplay) this.statusDisplay.text = "Phase 1 complete";
-        this.completePhase1();
-      });
-    this.currentTween.start();
-  }
+  });
+}
   
   private completePhase1() {
     this.isAnimating = false;
     if (this.buttonText) this.buttonText.text = "Start Story";
-    if (this.statusDisplay) this.statusDisplay.text = "Ready";
     this.currentTween = null;
-    // keep visuals visible for now; later phases will continue sequence
   }
-  
+
   // optional: a reset helper
   public resetPhase1() {
     if (this.currentTween && this.currentTween.cancel) this.currentTween.cancel();
     this.isAnimating = false;
+    this.storyData = null;
+    
     if (this.initialDot) {
       this.initialDot.enabled = false;
       this.initialDot.getTransform().setLocalScale(vec3.zero());

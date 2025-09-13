@@ -27,15 +27,18 @@
   CurrentVisibility: Editable
   MaxVisibility: Editable
   ScriptInputsHidden:
+    apiEndpoint: false
     buttonMaterial: false
     buttonText: false
     dotAppearDuration: false
     dotOffset: false
     generateButton: false
     initialDot: false
+    internetModule: false
     lineExpandDuration: false
     lineTargetLength: false
     lineVisual: false
+    snap3DFactory: false
     statusDisplay: false
   ScriptTypesHidden:
     {}
@@ -48,6 +51,9 @@
       buttonText: !<reference.Text> 00000000-0000-0000-0000-000000000000
       statusDisplay: !<reference.Text> 00000000-0000-0000-0000-000000000000
       buttonMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      internetModule: !<reference.InternetModule> 00000000-0000-0000-0000-000000000000
+      apiEndpoint: "https://jsonplaceholder.typicode.com/posts/1"
+      snap3DFactory: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
       dotAppearDuration: 0.800000
       lineExpandDuration: 0.600000
       lineTargetLength: 0.600000
@@ -64,6 +70,11 @@
     - '// @input Component.Text buttonText {"hint":"Optional: Text component on button for state feedback"}'
     - '// @input Component.Text statusDisplay {"hint":"Optional: Status display text"}'
     - '// @input Asset.Material buttonMaterial {"hint":"Optional: Material for button color changes"}'
+    - '// @input Asset.InternetModule internetModule {"hint":"InternetModule asset for making HTTP requests"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"API Configuration"}'
+    - '// @input string apiEndpoint = "https://jsonplaceholder.typicode.com/posts/1" {"hint":"API endpoint URL to fetch story data from"}'
+    - // @input AssignableType_1 snap3DFactory
     - '// @ui {"widget":"separator"}'
     - '// @ui {"widget":"label", "label":"Phase 1 Configuration"}'
     - '// @input float dotAppearDuration = 0.8 {"hint":"Duration for initial dot appearance (in seconds)"}'

@@ -27,12 +27,8 @@
   CurrentVisibility: Editable
   MaxVisibility: Editable
   ScriptInputsHidden:
-    buttonMaterial: false
-    buttonText: false
     generateButton: false
     snap3DFactory: false
-    spinner: false
-    statusDisplay: false
     targetPosition: false
     textPrompt: false
   ScriptTypesHidden:
@@ -44,10 +40,6 @@
       textPrompt: A futuristic robot
       targetPosition: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
       generateButton: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
-      buttonText: !<reference.Text> 00000000-0000-0000-0000-000000000000
-      statusDisplay: !<reference.Text> 00000000-0000-0000-0000-000000000000
-      spinner: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
-      buttonMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
   ScriptTypes:
     -
       {}
@@ -59,7 +51,3 @@
     - '// @input string textPrompt = "A futuristic robot" {"hint":"Enter the text prompt for 3D object generation"}'
     - // @input SceneObject targetPosition
     - // @input AssignableType_1 generateButton
-    - '// @input Component.Text buttonText {"hint":"Optional: Text component on the button for state feedback"}'
-    - '// @input Component.Text statusDisplay {"hint":"Optional: Text display for current status"}'
-    - '// @input SceneObject spinner {"hint":"Optional: Spinner/loading indicator"}'
-    - '// @input Asset.Material buttonMaterial {"hint":"Optional: Material for button color changes"}'
