@@ -305,31 +305,26 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
   }
 });
 
-// Test icon generation
-app.post('/api/generate-icon', async (req, res) => {
+// Test Gemini text generation
+app.post('/api/test-gemini', async (req, res) => {
   try {
-    const { iconCategory, theme = 'low-poly' } = req.body;
+    const { prompt = 'Create a short travel story title' } = req.body;
 
-    if (!iconCategory) {
-      return res.status(400).json({ error: 'iconCategory required' });
-    }
-
-    console.log(`🎨 Testing icon generation for "${iconCategory}"...`);
-    const iconUrl = await GeminiService.generateMemoryIcon(iconCategory, theme);
+    console.log(`🧪 Testing Gemini with prompt: "${prompt}"`);
+    const result = await GeminiService.enhanceMemoryTitle(prompt);
 
     res.json({
       success: true,
-      iconCategory,
-      theme,
-      iconUrl,
-      message: 'Icon generated successfully'
+      prompt,
+      result,
+      message: 'Gemini test successful'
     });
 
   } catch (error) {
     res.status(500).json({
-      error: 'Icon generation failed',
+      error: 'Gemini test failed',
       details: error.message,
-      iconCategory: req.body?.iconCategory
+      prompt: req.body?.prompt
     });
   }
 });

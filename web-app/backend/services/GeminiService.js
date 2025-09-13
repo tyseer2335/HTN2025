@@ -15,9 +15,9 @@ export class GeminiService {
     }
 
     try {
-      // Use Gemini 2.5 Flash Image (nano-banana) for image generation
+      // Use Gemini 2.0 Flash (nano-banana) for image generation
       const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash-image-preview"
+        model: "gemini-2.0-flash"
       });
 
       const themeStyles = {
@@ -74,7 +74,7 @@ export class GeminiService {
     }
 
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
       const prompt = `Create a catchy, memorable 3-5 word title for this travel memory. Make it evocative and specific to the experience described.
 
@@ -110,7 +110,7 @@ Examples of good titles:
     }
 
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
       const prompt = `Analyze this travel description and extract key metadata. Return ONLY valid JSON.
 
@@ -148,7 +148,7 @@ Extract:
     }
 
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
       await model.generateContent(['Hello']);
       return { status: 'connected', model: 'gemini-2.5-flash' };
     } catch (error) {

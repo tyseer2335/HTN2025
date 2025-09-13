@@ -208,11 +208,12 @@ function generateGeminiPanel(description, title, panelIndex) {
         body: {
             contents: [{
                 parts: [{
-                    text: "Create a vibrant comic book style illustration for this travel memory panel. " +
+                    text: "Create a vibrant watercolor comic book style illustration for this travel memory panel. " +
                           "Scene description: " + description + ". " +
-                          "Style requirements: bold comic book art with clear outlines, cinematic travel photography aesthetic, " +
-                          "rich visual storytelling details, 16:9 aspect ratio. " +
-                          "NO text or speech bubbles in the image."
+                          "Style requirements: soft watercolor painting with flowing colors, bold comic outlines, " +
+                          "cinematic travel photography composition, rich visual storytelling details, " +
+                          "16:9 aspect ratio optimized for AR display. " +
+                          "NO text, speech bubbles, or captions in the image."
                 }],
                 role: 'user'
             }]
@@ -221,10 +222,12 @@ function generateGeminiPanel(description, title, panelIndex) {
 
     Gemini.models(request).then(function(response) {
         if (response.candidates && response.candidates[0]) {
-            print("✅ Panel " + (panelIndex + 1) + " image generated");
+            print("✅ Panel " + (panelIndex + 1) + " image generated successfully");
 
             // Apply generated image to panel
             applyImageToPanel(response, panelIndex);
+        } else {
+            print("⚠️ Panel " + (panelIndex + 1) + " - No image in response");
         }
     }).catch(function(error) {
         print("❌ Gemini panel generation failed: " + error);
