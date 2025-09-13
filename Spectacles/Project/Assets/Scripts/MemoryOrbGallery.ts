@@ -193,18 +193,32 @@ export class MemoryOrbGallery extends BaseScriptComponent {
         description: "A relaxing day at the beach with family",
         theme: "watercolor",
         storyboard: {
-          panels: [
-            {
-              imageUrl: "placeholder_beach_1.jpg",
-              caption: "The sun was shining as we arrived at the pristine beach.",
-              audioUrl: "placeholder_audio_1.mp3"
-            },
-            {
-              imageUrl: "placeholder_beach_2.jpg",
-              caption: "Building sandcastles became our afternoon adventure.",
-              audioUrl: "placeholder_audio_2.mp3"
-            }
-          ]
+          iconCategory: "beach-umbrella",
+          p1: {
+            title: "Arrival",
+            description: "The sun was shining as we arrived at the pristine beach.",
+            generatedImageUrl: "data:image/png;base64,..." // Would be actual base64 from Gemini
+          },
+          p2: {
+            title: "Building Dreams",
+            description: "Building sandcastles became our afternoon adventure.",
+            generatedImageUrl: "data:image/png;base64,..." // Would be actual base64 from Gemini
+          },
+          p3: {
+            title: "Ocean Waves",
+            description: "The waves called us for a refreshing swim.",
+            generatedImageUrl: "data:image/png;base64,..."
+          },
+          p4: {
+            title: "Golden Hour",
+            description: "As evening approached, the sky turned golden.",
+            generatedImageUrl: "data:image/png;base64,..."
+          },
+          p5: {
+            title: "Memories Made",
+            description: "We packed up with hearts full of beautiful memories.",
+            generatedImageUrl: "data:image/png;base64,..."
+          }
         },
         createdAt: new Date(),
         thumbnailUrl: "beach_thumbnail.jpg"
@@ -215,13 +229,32 @@ export class MemoryOrbGallery extends BaseScriptComponent {
         description: "Conquering the highest peak in the area",
         theme: "sketch",
         storyboard: {
-          panels: [
-            {
-              imageUrl: "placeholder_mountain_1.jpg",
-              caption: "The trail began steep and challenging.",
-              audioUrl: "placeholder_audio_3.mp3"
-            }
-          ]
+          iconCategory: "mountain-peak",
+          p1: {
+            title: "The Ascent Begins",
+            description: "The trail began steep and challenging.",
+            generatedImageUrl: "data:image/png;base64,..."
+          },
+          p2: {
+            title: "Rocky Terrain",
+            description: "We navigated through boulder fields with determination.",
+            generatedImageUrl: "data:image/png;base64,..."
+          },
+          p3: {
+            title: "Above the Clouds",
+            description: "Suddenly we broke through the cloud line.",
+            generatedImageUrl: "data:image/png;base64,..."
+          },
+          p4: {
+            title: "Summit Victory",
+            description: "At the peak, the world stretched endlessly below.",
+            generatedImageUrl: "data:image/png;base64,..."
+          },
+          p5: {
+            title: "Descent & Reflection",
+            description: "Coming down, we carried the mountain's spirit with us.",
+            generatedImageUrl: "data:image/png;base64,..."
+          }
         },
         createdAt: new Date(),
         thumbnailUrl: "mountain_thumbnail.jpg"
@@ -244,11 +277,21 @@ interface MemoryData {
 }
 
 interface Storyboard {
-  panels: StoryPanel[];
+  iconCategory: string;
+  p1: StoryPanel;
+  p2: StoryPanel;
+  p3: StoryPanel;
+  p4: StoryPanel;
+  p5: StoryPanel;
+  // Legacy format support
+  panels?: StoryPanel[];
 }
 
 interface StoryPanel {
-  imageUrl: string;
-  caption: string;
-  audioUrl: string;
+  title: string;
+  description: string;
+  generatedImageUrl?: string; // Gemini-generated comic image
+  imageUrl?: string; // Legacy field for compatibility
+  caption?: string; // Legacy field for compatibility
+  audioUrl?: string; // Legacy field for compatibility
 }

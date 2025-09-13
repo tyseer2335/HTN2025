@@ -4,6 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import { saveMemory, getAllMemories, getUserMemories, getMemoryById, getMemoryStats } from './db.js';
+import { GeminiService } from './services/GeminiService.js';
 
 const app = express();
 app.use(cors());
@@ -63,13 +64,23 @@ function buildMessage(blurb, dataUrls) {
   return [{ role: 'user', content: [textBlock, ...imageBlocks] }];
 }
 
-// Health check with MongoDB status
+// Health check with MongoDB and Gemini status
 app.get('/api/ping', async (_req, res) => {
   try {
     const stats = await getMemoryStats();
-    res.json({ ok: true, mongodb: stats });
+    const geminiHealth = await GeminiService.checkHealth();
+    res.json({
+      ok: true,
+      mongodb: stats,
+      gemini: geminiHealth
+    });
   } catch (error) {
-    res.json({ ok: true, mongodb: { status: 'disconnected', error: error.message } });
+    const geminiHealth = await GeminiService.checkHealth();
+    res.json({
+      ok: true,
+      mongodb: { status: 'disconnected', error: error.message },
+      gemini: geminiHealth
+    });
   }
 });
 
@@ -200,20 +211,59 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
 
       console.log('Storyboard JSON (normalized):\n', JSON.stringify(normalizedStoryboard, null, 2));
 
+      // Generate images for each panel using Gemini
+      let enhancedStoryboard = { ...normalizedStoryboard };
+      let generatedTitle = null;
+
+      try {
+        console.log('🎨 Starting Gemini image generation pipeline...');
+
+        // Generate enhanced title
+        generatedTitle = await GeminiService.enhanceMemoryTitle(blurb);
+
+        // Generate images for each panel
+        const panelKeys = ['p1', 'p2', 'p3', 'p4', 'p5'];
+        for (let i = 0; i < panelKeys.length; i++) {
+          const panelKey = panelKeys[i];
+          const panel = enhancedStoryboard[panelKey];
+
+          if (panel?.description) {
+            try {
+              const generatedImage = await GeminiService.generateStoryboardImage(
+                panel.description,
+                i,
+                enhancedStoryboard.iconCategory
+              );
+
+              panel.generatedImageUrl = generatedImage;
+              console.log(`✅ Panel ${i + 1} image generated`);
+            } catch (imageError) {
+              console.error(`❌ Failed to generate image for panel ${i + 1}:`, imageError.message);
+              // Continue with other panels even if one fails
+            }
+          }
+        }
+
+        console.log('🎨 Gemini enhancement complete!');
+      } catch (geminiError) {
+        console.error('⚠️ Gemini enhancement failed, continuing with text-only:', geminiError.message);
+      }
+
       // Save to MongoDB
       try {
         const memoryData = {
           id: `memory_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
           userId: 'anonymous', // Can be updated when auth is added
-          title: `Memory from ${new Date().toLocaleDateString()}`,
+          title: generatedTitle || `Memory from ${new Date().toLocaleDateString()}`,
           description: blurb,
           theme: 'watercolor', // Default theme
-          storyboard: normalizedStoryboard,
+          storyboard: enhancedStoryboard,
           originalImages: dataUrls.length,
           metadata: {
-            aiModel: 'cohere-aya-vision',
+            aiModels: ['cohere-aya-vision', 'gemini-2.5-flash-image'],
             processingTime: Date.now(),
-            version: '2.0'
+            version: '3.0',
+            hasGeneratedImages: enhancedStoryboard.p1?.generatedImageUrl ? true : false
           }
         };
 
@@ -222,7 +272,7 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
 
         // Return enhanced response with both team format AND our enhancements
         return res.json({
-          ...normalizedStoryboard, // Your team's expected format
+          ...enhancedStoryboard, // Enhanced format with generated images
           memoryId: savedMemory._id,
           saved: true,
           _meta: {
@@ -232,9 +282,9 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
 
       } catch (dbError) {
         console.error('MongoDB save failed:', dbError);
-        // Still return the normalized storyboard even if DB save fails
+        // Still return the enhanced storyboard even if DB save fails
         return res.json({
-          ...normalizedStoryboard,
+          ...enhancedStoryboard,
           saved: false,
           saveError: 'Database unavailable'
         });

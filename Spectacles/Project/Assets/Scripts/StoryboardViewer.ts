@@ -151,10 +151,10 @@ export class StoryboardViewer extends BaseScriptComponent {
    * Displays a storyboard with its panels
    */
   public displayStoryboard(storyboard: any): void {
-    this.currentStoryboard = storyboard;
+    this.currentStoryboard = this.normalizeStoryboard(storyboard);
     this.currentPanelIndex = 0;
 
-    if (!storyboard || !storyboard.panels || storyboard.panels.length === 0) {
+    if (!this.currentStoryboard || !this.currentStoryboard.panels || this.currentStoryboard.panels.length === 0) {
       print("Error: Invalid storyboard data");
       return;
     }
@@ -393,5 +393,37 @@ export class StoryboardViewer extends BaseScriptComponent {
     if (this.isVisible) {
       this.positionInFrontOfUser();
     }
+  }
+
+  /**
+   * Normalizes storyboard format (supports both new p1-p5 format and legacy panels array)
+   */
+  private normalizeStoryboard(storyboard: any): any {
+    if (!storyboard) return null;
+
+    // If it already has panels array, it's already normalized or legacy format
+    if (storyboard.panels && Array.isArray(storyboard.panels)) {
+      return storyboard;
+    }
+
+    // Convert new p1-p5 format to panels array for compatibility
+    if (storyboard.p1) {
+      const panels = [storyboard.p1, storyboard.p2, storyboard.p3, storyboard.p4, storyboard.p5]
+        .filter(panel => panel) // Remove any undefined panels
+        .map(panel => ({
+          // Use new format fields, fall back to legacy fields
+          imageUrl: panel.generatedImageUrl || panel.imageUrl || "placeholder.jpg",
+          caption: panel.description || panel.caption || panel.title || "",
+          audioUrl: panel.audioUrl || ""
+        }));
+
+      return {
+        ...storyboard,
+        panels: panels
+      };
+    }
+
+    print("Warning: Unrecognized storyboard format");
+    return storyboard;
   }
 }
