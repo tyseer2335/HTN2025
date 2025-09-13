@@ -5667,7 +5667,7 @@
     {}
   ScriptInputs:
     "":
-      apiToken: 56080ec5-51e3-46e6-855d-b66a7454fd8b
+      apiToken: "[PUT YOUR SNAP3D API KEY HERE]"
   ScriptTypes:
     "":
       {}
