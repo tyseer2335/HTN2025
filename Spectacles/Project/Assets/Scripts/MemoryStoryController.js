@@ -1,13 +1,13 @@
 /**
  * Main controller for memory story gallery on Spectacles
  * Handles icon generation, panel creation, and user interactions
+ * Uses Remote Service Gateway for Snap3D and Gemini APIs
  */
 
 // @input Component.MeshVisual iconMesh
 // @input SceneObject galleryRoot
 // @input SceneObject panelTemplate
 // @input SceneObject[] panelSlots
-// @input string apiBaseUrl = "http://localhost:8787"
 
 // Complete JSON data (hardcoded for now)
 var jsonData = `{
@@ -147,34 +147,120 @@ function toggleGallery() {
 function generateImages() {
     if (!storyData) return;
 
-    // Generate icon
-    callAPI("/api/generate-icon", {
-        iconCategory: storyData.iconCategory,
-        theme: "low-poly"
-    });
+    // Generate 3D icon using Snap3D Remote Service Gateway
+    generateSnap3DIcon(storyData.iconCategory);
 
-    // Generate panel images
+    // Generate 2D panel images using Gemini Remote Service Gateway
     var panels = ['p1', 'p2', 'p3', 'p4', 'p5'];
     for (var i = 0; i < panels.length; i++) {
         var key = panels[i];
         if (storyData[key]) {
-            callAPI("/api/generate-panel", {
-                description: storyData[key].description,
-                title: storyData[key].title,
-                panelIndex: i,
-                model: "gemini-nano-banana"
-            });
+            generateGeminiPanel(storyData[key].description, storyData[key].title, i);
         }
     }
 }
 
-function callAPI(endpoint, payload) {
-    var url = script.apiBaseUrl + endpoint;
-    print("🔗 API call: " + url);
-    print("📤 Payload: " + JSON.stringify(payload));
+function generateSnap3DIcon(iconCategory) {
+    var prompt = "A low-poly 3D " + iconCategory + " icon optimized for AR display with clean geometric shapes";
+    print("📦 Generating 3D icon: " + prompt);
 
-    // TODO: Replace with actual HTTP request when RemoteServiceModule is ready
-    // This is the ONLY placeholder - everything else works
+    // Import Snap3D from Remote Service Gateway
+    var Snap3D = require('Remote Service Gateway.lspkg/HostedSnap/Snap3D').Snap3D;
+
+    Snap3D.submitAndGetStatus({
+        prompt: prompt,
+        format: 'glb',
+        refine: true,
+        use_vertex_color: true,
+        use_case: 'memory_icon'
+    }).then(function(submitGetStatusResults) {
+        submitGetStatusResults.event.add(function(eventData) {
+            var value = eventData[0];
+            var assetOrError = eventData[1];
+
+            if (value === 'refined_mesh' || value === 'base_mesh') {
+                var gltfAsset = assetOrError;
+                print("✅ 3D icon generated successfully");
+
+                // Apply to icon mesh
+                if (script.iconMesh && gltfAsset.gltf) {
+                    script.iconMesh.mesh = gltfAsset.gltf;
+                }
+            } else if (value === 'failed') {
+                var error = assetOrError;
+                print("❌ 3D icon generation failed: " + error.errorMsg);
+            }
+        });
+    }).catch(function(error) {
+        print("❌ Snap3D error: " + error);
+    });
+}
+
+function generateGeminiPanel(description, title, panelIndex) {
+    print("🎨 Generating panel " + (panelIndex + 1) + ": " + title);
+
+    // Import Gemini from Remote Service Gateway
+    var Gemini = require('Remote Service Gateway.lspkg/HostedExternal/Gemini').Gemini;
+
+    var request = {
+        model: 'gemini-2.0-flash',
+        type: 'generateContent',
+        body: {
+            contents: [{
+                parts: [{
+                    text: "Create a vibrant comic book style illustration for this travel memory panel. " +
+                          "Scene description: " + description + ". " +
+                          "Style requirements: bold comic book art with clear outlines, cinematic travel photography aesthetic, " +
+                          "rich visual storytelling details, 16:9 aspect ratio. " +
+                          "NO text or speech bubbles in the image."
+                }],
+                role: 'user'
+            }]
+        }
+    };
+
+    Gemini.models(request).then(function(response) {
+        if (response.candidates && response.candidates[0]) {
+            print("✅ Panel " + (panelIndex + 1) + " image generated");
+
+            // Apply generated image to panel
+            applyImageToPanel(response, panelIndex);
+        }
+    }).catch(function(error) {
+        print("❌ Gemini panel generation failed: " + error);
+    });
+}
+
+function applyImageToPanel(geminiResponse, panelIndex) {
+    if (script.panelSlots[panelIndex]) {
+        var panel = script.panelSlots[panelIndex].getChild(0);
+        if (panel) {
+            var imageComponent = findImageComponent(panel, "PanelImage");
+            if (imageComponent) {
+                print("📷 Applying generated image to panel " + (panelIndex + 1));
+                // Note: Actual image application depends on Gemini response format
+                // This will need to be refined based on the response structure
+            }
+        }
+    }
+}
+
+function findImageComponent(parent, childName) {
+    for (var i = 0; i < parent.getChildrenCount(); i++) {
+        var child = parent.getChild(i);
+        if (child.name === childName) {
+            return child.getComponent("Component.Image");
+        }
+    }
+
+    // Search recursively
+    for (var i = 0; i < parent.getChildrenCount(); i++) {
+        var child = parent.getChild(i);
+        var found = findImageComponent(child, childName);
+        if (found) return found;
+    }
+
+    return null;
 }
 
 // Public functions for external use

@@ -221,14 +221,10 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
         // Generate enhanced title
         generatedTitle = await GeminiService.enhanceMemoryTitle(blurb);
 
-        // Generate icon for the memory orb
-        try {
-          const memoryIcon = await GeminiService.generateMemoryIcon(enhancedStoryboard.iconCategory);
-          enhancedStoryboard.generatedIconUrl = memoryIcon;
-          console.log(`✅ Memory icon generated for "${enhancedStoryboard.iconCategory}"`);
-        } catch (iconError) {
-          console.error('❌ Icon generation failed:', iconError.message);
-        }
+        // Store icon category for Snap 3D generation (done in Spectacles)
+        enhancedStoryboard.snap3DIconPrompt = `Create a low-poly 3D ${enhancedStoryboard.iconCategory} icon for AR display`;
+        console.log(`📦 3D icon prompt ready: "${enhancedStoryboard.snap3DIconPrompt}"`);
+
 
         // Generate images for each panel
         const panelKeys = ['p1', 'p2', 'p3', 'p4', 'p5'];

@@ -8,59 +8,7 @@ if (!API_KEY) {
 const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null;
 
 export class GeminiService {
-  static async generateMemoryIcon(iconCategory, theme = 'low-poly') {
-    if (!genAI) {
-      throw new Error('Gemini API key not configured');
-    }
-
-    try {
-      const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash-image-preview"
-      });
-
-      const prompt = `Create a ${theme} 3D icon representing "${iconCategory}".
-
-Style requirements:
-- Simple, clean ${theme} 3D design
-- Solid colors with minimal detail
-- Perfect for AR display at small scale
-- Icon should be recognizable from any angle
-- Suitable for floating memory orb in AR space
-- 512x512 resolution
-- Transparent or minimal background
-- Optimized for mobile AR performance
-
-Examples of good ${theme} icons:
-- Geometric shapes with clean edges
-- Bold, recognizable silhouettes
-- Limited color palette (2-3 colors max)
-- No fine details that disappear at distance`;
-
-      console.log(`🎨 Generating ${theme} icon for "${iconCategory}"...`);
-
-      const result = await model.generateContent([prompt]);
-      const response = await result.response;
-
-      if (response.candidates?.[0]?.content?.parts) {
-        const imagePart = response.candidates[0].content.parts.find(part => part.inlineData);
-
-        if (imagePart?.inlineData) {
-          const mimeType = imagePart.inlineData.mimeType || 'image/png';
-          const imageData = imagePart.inlineData.data;
-          const dataUrl = `data:${mimeType};base64,${imageData}`;
-
-          console.log(`✅ Generated ${mimeType} icon for "${iconCategory}"`);
-          return dataUrl;
-        }
-      }
-
-      throw new Error('No image data in Gemini response');
-
-    } catch (error) {
-      console.error(`❌ Icon generation failed for "${iconCategory}":`, error.message);
-      throw error;
-    }
-  }
+  // Removed icon generation - using Snap 3D API for icons instead
   static async generateStoryboardImage(panelDescription, panelIndex, theme = 'watercolor') {
     if (!genAI) {
       throw new Error('Gemini API key not configured');
