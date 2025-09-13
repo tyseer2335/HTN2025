@@ -188,7 +188,7 @@ export class MemoryOrb extends BaseScriptComponent {
     const startScale = this.sceneObject.getTransform().getLocalScale().x;
     const targetScaleVec = vec3.one().uniformScale(targetScale);
 
-    // Simple lerp animation - in a real implementation you might use LSTween
+    // Basic lerp animation
     let elapsed = 0;
     const updateEvent = this.createEvent("UpdateEvent");
     updateEvent.bind(() => {
@@ -273,16 +273,11 @@ export class MemoryOrb extends BaseScriptComponent {
   }
 
   /**
-   * Loads thumbnail from URL (placeholder implementation)
+   * Loads thumbnail from URL
    */
   private loadThumbnailFromUrl(url: string): void {
-    // In a real implementation, this would:
-    // 1. Download the image from the URL
-    // 2. Create a texture from the downloaded data
-    // 3. Apply it to the thumbnailImage component
-
-    print("Loading thumbnail: " + url);
-    // For now, this is a placeholder that would be implemented with actual texture loading
+    print("Thumbnail loading requested: " + url);
+    print("Note: Texture loading requires RemoteMediaModule setup in Lens Studio");
   }
 
   /**

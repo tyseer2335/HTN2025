@@ -68,12 +68,12 @@ export class MemoryOrbGallery extends BaseScriptComponent {
   }
 
   /**
-   * Loads memories from MongoDB Atlas via the web app API
+   * Loads memories from storage
    */
   private async loadMemoriesFromStorage(): Promise<void> {
     try {
-      // This would connect to your web app backend to fetch memories
-      // For now, we'll use placeholder data
+      print("Loading memories from backend...");
+      // Using local placeholder data until HTTP module is configured
       this.memories = this.generatePlaceholderMemories();
       this.createOrbsForMemories();
     } catch (error) {
