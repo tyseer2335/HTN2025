@@ -3,10 +3,12 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
+import { saveMemory, getAllMemories, getUserMemories, getMemoryById, getMemoryStats } from './db.js';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
 
 const API_KEY = process.env.COHERE_API_KEY;
 if (!API_KEY) throw new Error('Set COHERE_API_KEY in your .env');
@@ -47,7 +49,7 @@ function buildMessage(blurb, dataUrls) {
       'Description quality (each panel):',
       '- 90–140 words with concrete visual details grounded in the photos.',
       '- Include: who is present, where (specific place/setting), when (time of day/season), objective/emotion, a small conflict/surprise/decision, sensory details, and composition cues (POV/shot, framing, motion).',
-      '- End p1–p4 with a forward hook. End p5 with a reflective line that ties back to the trip’s theme.',
+      '- End p1–p4 with a forward hook. End p5 with a reflective line that ties back to the trip theme.',
       '',
       `TRIP BLURB: """${blurb}"""`,
     ].join('\n'),
@@ -61,8 +63,53 @@ function buildMessage(blurb, dataUrls) {
   return [{ role: 'user', content: [textBlock, ...imageBlocks] }];
 }
 
-// Health
-app.get('/api/ping', (_req, res) => res.json({ ok: true }));
+// Health check with MongoDB status
+app.get('/api/ping', async (_req, res) => {
+  try {
+    const stats = await getMemoryStats();
+    res.json({ ok: true, mongodb: stats });
+  } catch (error) {
+    res.json({ ok: true, mongodb: { status: 'disconnected', error: error.message } });
+  }
+});
+
+// Get all memories (for Spectacles sync)
+app.get('/api/memories', async (req, res) => {
+  try {
+    const { userId = 'anonymous', limit = 20 } = req.query;
+    const memories = await getUserMemories(userId, parseInt(limit));
+
+    // Format for Spectacles consumption
+    const spectaclesFormat = memories.map(memory => ({
+      id: memory.id || memory._id.toString(),
+      title: memory.title || 'Untitled Memory',
+      description: memory.description,
+      theme: memory.theme || 'watercolor',
+      storyboard: memory.storyboard,
+      createdAt: memory.createdAt,
+      thumbnailUrl: memory.storyboard?.panels?.[0]?.generatedImageUrl || null
+    }));
+
+    res.json(spectaclesFormat);
+  } catch (error) {
+    console.error('Get memories error:', error);
+    res.status(500).json({ error: 'Failed to fetch memories' });
+  }
+});
+
+// Get specific memory
+app.get('/api/memories/:id', async (req, res) => {
+  try {
+    const memory = await getMemoryById(req.params.id);
+    if (!memory) {
+      return res.status(404).json({ error: 'Memory not found' });
+    }
+    res.json(memory);
+  } catch (error) {
+    console.error('Get memory error:', error);
+    res.status(500).json({ error: 'Failed to get memory' });
+  }
+});
 
 // POST /api/storyboard  (form-data: blurb, images[4])
 app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
@@ -115,9 +162,9 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
         description: typeof p.description === 'string' ? p.description : '',
       });
 
-      let out;
+      let normalizedStoryboard;
       if (Array.isArray(raw.panels)) {
-        out = {
+        normalizedStoryboard = {
           iconCategory:
             raw.iconCategory || raw.globalIcon || raw.icon ||
             (raw.panels.find((p) => typeof p.iconPrompt === 'string')?.iconPrompt) ||
@@ -129,7 +176,7 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
           p5: toPanel(raw.panels[4]),
         };
       } else {
-        out = {
+        normalizedStoryboard = {
           iconCategory:
             raw.iconCategory || raw.globalIcon || raw.icon ||
             (raw?.p1?.iconPrompt ?? 'memory-orb'),
@@ -142,7 +189,7 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
       }
 
       const ok = ['p1', 'p2', 'p3', 'p4', 'p5'].every(
-        (k) => out[k]?.title && out[k]?.description
+        (k) => normalizedStoryboard[k]?.title && normalizedStoryboard[k]?.description
       );
       if (!ok) {
         return res.status(502).json({
@@ -151,8 +198,48 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
         });
       }
 
-      console.log('Storyboard JSON (normalized):\n', JSON.stringify(out, null, 2));
-      return res.json(out);
+      console.log('Storyboard JSON (normalized):\n', JSON.stringify(normalizedStoryboard, null, 2));
+
+      // Save to MongoDB
+      try {
+        const memoryData = {
+          id: `memory_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+          userId: 'anonymous', // Can be updated when auth is added
+          title: `Memory from ${new Date().toLocaleDateString()}`,
+          description: blurb,
+          theme: 'watercolor', // Default theme
+          storyboard: normalizedStoryboard,
+          originalImages: dataUrls.length,
+          metadata: {
+            aiModel: 'cohere-aya-vision',
+            processingTime: Date.now(),
+            version: '2.0'
+          }
+        };
+
+        const savedMemory = await saveMemory(memoryData);
+        console.log('💾 Memory saved to MongoDB:', savedMemory._id);
+
+        // Return enhanced response with both team format AND our enhancements
+        return res.json({
+          ...normalizedStoryboard, // Your team's expected format
+          memoryId: savedMemory._id,
+          saved: true,
+          _meta: {
+            mongodb: true
+          }
+        });
+
+      } catch (dbError) {
+        console.error('MongoDB save failed:', dbError);
+        // Still return the normalized storyboard even if DB save fails
+        return res.json({
+          ...normalizedStoryboard,
+          saved: false,
+          saveError: 'Database unavailable'
+        });
+      }
+
     } catch {
       console.log('Model returned non-JSON (preview):', text.slice(0, 200));
       return res.status(502).json({ error: 'invalid_json_from_model', preview: text.slice(0, 400) });
@@ -163,7 +250,43 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
   }
 });
 
+// Test endpoint for MongoDB
+app.post('/api/test-memory', async (req, res) => {
+  try {
+    const testMemory = {
+      id: `test_${Date.now()}`,
+      userId: 'test-user',
+      title: 'Test Memory',
+      description: 'This is a test memory to verify MongoDB connection',
+      theme: 'watercolor',
+      storyboard: {
+        storyId: 'test',
+        theme: 'watercolor',
+        panels: [
+          {
+            id: 'p1',
+            title: 'Test Panel',
+            description: 'Testing MongoDB integration',
+            keywords: ['test', 'mongodb', 'hackathon']
+          }
+        ]
+      }
+    };
+
+    const saved = await saveMemory(testMemory);
+    res.json({ success: true, message: 'MongoDB working!', memoryId: saved._id });
+  } catch (error) {
+    res.status(500).json({ error: 'MongoDB connection failed', details: error.message });
+  }
+});
+
+
+
+
 const PORT = process.env.PORT || 8787;
 app.listen(PORT, () => {
-  console.log(`Backend listening on http://localhost:${PORT}`);
+  console.log(`🚀 Memory Backend with MongoDB Atlas`);
+  console.log(`📡 Server: http://localhost:${PORT}`);
+  console.log(`🧪 Test: http://localhost:${PORT}/api/ping`);
+  console.log(`💾 MongoDB: ${process.env.MONGODB_URI ? 'Configured' : 'Not configured'}`);
 });
