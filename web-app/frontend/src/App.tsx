@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Upload, Sparkles } from 'lucide-react';
 
 type Panel = {
   title: string;
@@ -75,65 +76,100 @@ export default function App() {
   };
 
   return (
-    <main style={{ maxWidth: 820, margin: '2rem auto', fontFamily: 'system-ui' }}>
-      <h1>Storyboard (4 images + Aya Vision)</h1>
+    <div className="min-h-screen bg-slate-900 text-white">
+      {/* Header */}
+      <header className="flex items-center gap-3 p-6">
+        <div>
+          <h1 className="text-white text-xl">SpectraSphere</h1>
+          <p className="text-gray-400 text-sm">Reimagine your world, one memory at a time.</p>
+        </div>
+      </header>
 
-      <form onSubmit={onSubmit} style={{ display: 'grid', gap: 12 }}>
-        <label>
-          Pick {REQUIRED_IMAGES} images:
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(e) => onPick(e.target.files)}
-          />
-        </label>
-
-        <div style={{ fontSize: 12, opacity: 0.7 }}>
-          Selected: {files?.length ?? 0} / {REQUIRED_IMAGES}
+      <main className="max-w-4xl mx-auto px-6 py-12">
+        <div className="text-center mb-16">
+          <h2 className="text-5xl font-medium mb-6 text-white">
+            Transform Your Journey Into Art
+          </h2>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Relive the moment through a different lens — powered by Spectacles.
+          </p>
         </div>
 
-        <label>
-          Trip blurb:
-          <textarea
-            rows={4}
-            value={blurb}
-            onChange={(e) => setBlurb(e.target.value)}
-            style={{ width: '100%' }}
-          />
-        </label>
+        <form onSubmit={onSubmit}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+            {/* Upload Section */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-white text-lg">Upload Images</h3>
+                <span className="text-gray-400 text-sm">{files?.length ?? 0}/{REQUIRED_IMAGES} images</span>
+              </div>
+              
+              <label className="border-2 border-dashed border-gray-600 rounded-xl p-12 text-center hover:border-gray-500 transition-colors cursor-pointer block">
+                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-4" />
+                <h4 className="text-white text-lg mb-2">Upload Your {REQUIRED_IMAGES} Travel Photos</h4>
+                <p className="text-gray-400 text-sm">Click to select all images at once</p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => onPick(e.target.files)}
+                  className="hidden"
+                />
+              </label>
+            </div>
 
-        <button disabled={loading}>
-          {loading ? 'Generating…' : 'Generate 5-panel Storyboard'}
-        </button>
-      </form>
+            {/* Trip Description */}
+            <div>
+              <h3 className="text-white text-lg mb-4">Trip Description</h3>
+              <p className="text-gray-400 text-sm mb-4">
+                Share a brief description of your memorable journey
+              </p>
+              
+              <textarea
+                value={blurb}
+                onChange={(e) => setBlurb(e.target.value)}
+                className="w-full h-48 bg-slate-800 border border-gray-700 rounded-xl p-4 text-white placeholder-gray-500 resize-none focus:outline-none focus:border-gray-600 transition-colors"
+                placeholder="Tell us about your amazing trip... What made it special? Where did you go? What did you experience?"
+              />
+            </div>
+          </div>
 
-      {err && <p style={{ color: 'crimson', marginTop: 12 }}>{err}</p>}
+          {/* Generate Button */}
+          <div className="text-center mb-12">
+            <button
+              disabled={loading}
+              className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white px-8 py-4 rounded-full text-lg font-medium transition-all duration-300 flex items-center gap-2 mx-auto disabled:opacity-50"
+            >
+              <Sparkles className="w-5 h-5" />
+              {loading ? 'Generating…' : 'Generate Storyboard'}
+            </button>
+            
+            {err && <p className="text-red-500 mt-4">{err}</p>}
+          </div>
+        </form>
 
-      {story && (
-        <>
-          <h2 style={{ marginTop: 24 }}>Result JSON</h2>
-          <pre style={{ whiteSpace: 'pre-wrap', background: '#fafafa', padding: 12, borderRadius: 8 }}>
-            {JSON.stringify(story, null, 2)}
-          </pre>
+        {story && (
+          <div className="bg-slate-800 rounded-xl p-6 mt-8">
+            <h2 className="text-xl mb-4">Your Storyboard</h2>
+            <h3 className="text-lg mb-4">
+              Icon Category: <span className="font-semibold">{story.iconCategory}</span>
+            </h3>
+            <ol className="space-y-4">
+              {PANEL_ORDER.map((k, i) => {
+                const p = story[k];
+                return (
+                  <li key={k} className="bg-slate-700 p-4 rounded-lg">
+                    <div className="font-bold mb-2">{p.title || `Panel ${i + 1}`}</div>
+                    <p className="text-gray-300">{p.description}</p>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        )}
 
-          <h3 style={{ marginTop: 24 }}>
-            Icon Category: <span style={{ fontWeight: 600 }}>{story.iconCategory}</span>
-          </h3>
-
-          <ol style={{ marginTop: 12 }}>
-            {PANEL_ORDER.map((k, i) => {
-              const p = story[k];
-              return (
-                <li key={k} style={{ marginBottom: 16 }}>
-                  <div style={{ fontWeight: 700 }}>{p.title || `Panel ${i + 1}`}</div>
-                  <p style={{ marginTop: 6 }}>{p.description}</p>
-                </li>
-              );
-            })}
-          </ol>
-        </>
-      )}
-    </main>
+        {/* How It Works section remains the same as in your new UI */}
+      </main>
+    </div>
   );
 }
