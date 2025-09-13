@@ -27,25 +27,21 @@
   CurrentVisibility: Editable
   MaxVisibility: Editable
   ScriptInputsHidden:
-    buttonMaterial: false
-    generateButton: false
+    asrQueryController: false
     image: false
     modelProvider: false
     spinner: false
     textDisplay: false
-    textPrompt: false
   ScriptTypesHidden:
     {}
   ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
   DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
   DefaultScriptInputs:
     - modelProvider: OpenAI
-      textPrompt: A beautiful sunset over mountains
       image: !<reference.Image> 00000000-0000-0000-0000-000000000000
       textDisplay: !<reference.Text> 00000000-0000-0000-0000-000000000000
-      generateButton: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      asrQueryController: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
       spinner: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
-      buttonMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
   ScriptTypes:
     -
       {}
@@ -54,9 +50,7 @@
     - '// @ui {"widget":"label", "label":"Example of using generative image APIs"}'
     - '// @input string modelProvider = "OpenAI" {"widget":"combobox", "values":[{"label":"OpenAI", "value":"OpenAI"}, {"label":"Gemini", "value":"Gemini"}]}'
     - '// @ui {"widget":"separator"}'
-    - '// @input string textPrompt = "A beautiful sunset over mountains" {"hint":"Enter the text prompt for image generation"}'
     - // @input Component.Image image
     - // @input Component.Text textDisplay
-    - // @input AssignableType generateButton
+    - // @input AssignableType asrQueryController
     - // @input SceneObject spinner
-    - '// @input Asset.Material buttonMaterial {"hint":"Optional: Material for button color changes"}'
