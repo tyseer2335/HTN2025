@@ -10,9 +10,9 @@ updateCheckpoint: 68
 sceneId: 0a1ccb1a-fe88-4fbb-9883-e3af3c75fd99
 viewConfig:
   simulation:
-    device: Spectacles (2024)
-    cameraFov: nan
-    fullFrameAspect: 0.666660
+    device: No Simulation
+    cameraFov: 66.519997
+    fullFrameAspect: nan
     resolutionScale: 1.000000
     viewport: Maximized
     output: Live

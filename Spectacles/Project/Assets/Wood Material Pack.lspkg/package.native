@@ -1,0 +1,34 @@
+- !<NativePackageDescriptor/b6d01d28-3521-446e-9f3a-802a55a1fbca>
+  PackagePath: ""
+  StudioVersion:
+    major: 5
+    minor: 12
+    patch: 0
+    build: 25072306
+    type: Unset
+    buildFlavor: ""
+    timestamp: 0
+    commit: ""
+  Description: "Wood Material Pack Experience the warmth and beauty of nature with this stunning wood material asset. From rich textures to intricate grain patterns, this collection brings the timeless charm of wood to your creations. Whether crafting rustic scenes or modern designs, this material adds depth and authenticity, inviting a touch of natural elegance to your virtual world."
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  VersionMajor: 1
+  VersionMinor: 0
+  VersionPatch: 0
+  UpdateCheckpoint: 68
+  ExportUid: 56b54ef8-315b-4d8b-97ed-c601c7fd4b62
+  ComponentUid: 4b8acf5d-569b-4886-9ece-51a99da06a8e
+  CurrentVisibility: Editable
+  MaxVisibility: Editable
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  Instantiable: !<reference> 00000000-0000-0000-0000-000000000000
+  AssetLibraryDependencyStructure: !<AssetLibraryDependencyStructure>
+    Name: ""
+    AssetId: ""
+    Hash: ""
+    Version:
+      major: 0
+      minor: 0
+      patch: 0
+      build: 0

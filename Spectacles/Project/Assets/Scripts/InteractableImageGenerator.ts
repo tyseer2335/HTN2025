@@ -74,12 +74,6 @@ export class InteractableImageGenerator extends BaseScriptComponent {
     this.generateButton.enabled = !this.isGenerating;
   }
 
-  
-  // Public method to generate image with custom prompt
-  public generateImageWithPrompt(prompt: string) {
-    this.createImage(prompt);
-  }
-
   createImage(prompt: string) {
     // Start generation state
     this.isGenerating = true;

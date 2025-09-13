@@ -1,0 +1,72 @@
+- !<AssetImportMetadata/9405f0de-dae8-4275-ba7e-c484903e7843>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> e443d523-12e8-4927-b1dd-6719ab0d6900
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> e443d523-12e8-4927-b1dd-6719ab0d6900
+  PackageType: NotAPackage
+  PackagePolicy: CannotBeUnpacked
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> f964cd4a-9f91-4484-bbac-d6ca86d982fe
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/f964cd4a-9f91-4484-bbac-d6ca86d982fe>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: d034a8ad-ac33-4efa-98a8-c4e17d966d22
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  CurrentVisibility: Editable
+  MaxVisibility: Editable
+  ScriptInputsHidden:
+    buttonMaterial: false
+    buttonText: false
+    dotAppearDuration: false
+    dotOffset: false
+    generateButton: false
+    initialDot: false
+    lineExpandDuration: false
+    lineTargetLength: false
+    lineVisual: false
+    statusDisplay: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  DefaultScriptInputs:
+    - generateButton: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      initialDot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      lineVisual: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      buttonText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      statusDisplay: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      buttonMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      dotAppearDuration: 0.800000
+      lineExpandDuration: 0.600000
+      lineTargetLength: 0.600000
+      dotOffset: !<Vec3> {x: 0.000000, y: 0.060000, z: 0.000000}
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"Story Viewer - Phase 1: Initial Dot"}'
+    - '// @input AssignableType generateButton {"hint":"Button to trigger the story generation sequence"}'
+    - '// @input SceneObject initialDot {"hint":"Initial dot that appears when generation starts"}'
+    - '// @input SceneObject lineVisual {"hint":"Optional: line visual that will be scaled to form a line"}'
+    - '// @input Component.Text buttonText {"hint":"Optional: Text component on button for state feedback"}'
+    - '// @input Component.Text statusDisplay {"hint":"Optional: Status display text"}'
+    - '// @input Asset.Material buttonMaterial {"hint":"Optional: Material for button color changes"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"Phase 1 Configuration"}'
+    - '// @input float dotAppearDuration = 0.8 {"hint":"Duration for initial dot appearance (in seconds)"}'
+    - '// @input float lineExpandDuration = 0.6 {"hint":"Duration for line expansion (in seconds)"}'
+    - '// @input float lineTargetLength = 0.6 {"hint":"Length the line should expand to (local scale X)"}'
+    - '// @input vec3 dotOffset = {0,0.06,0} {"hint":"Local offset from button top where the dot should appear"}'
