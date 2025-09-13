@@ -15,16 +15,16 @@ const MODEL = process.env.COHERE_MODEL || 'c4ai-aya-vision-32b';
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { files: 3, fileSize: 5 * 1024 * 1024 },
+  limits: { files: 4, fileSize: 5 * 1024 * 1024 }, // <-- exactly 4 images
 });
 
-// ONE message: text + 3 image blocks (now panels only have title + description)
+// ONE message: text + 4 image blocks (panels have title + description)
 function buildMessage(blurb, dataUrls) {
   const textBlock = {
     type: 'text',
     text: [
       'You are an expert visual storyteller.',
-      'Using the 3 photos and the trip blurb, create a sequential 5-panel storyboard that reads like a mini travel narrative.',
+      'Using the 4 photos and the trip blurb, create a sequential 5-panel storyboard that reads like a mini travel narrative.',
       '',
       'Return ONLY raw JSON (no markdown, no prose, no code fences).',
       'Output EXACTLY in this shape (no extra fields):',
@@ -64,14 +64,14 @@ function buildMessage(blurb, dataUrls) {
 // Health
 app.get('/api/ping', (_req, res) => res.json({ ok: true }));
 
-// POST /api/storyboard  (form-data: blurb, images[3])
-app.post('/api/storyboard', upload.array('images', 3), async (req, res) => {
+// POST /api/storyboard  (form-data: blurb, images[4])
+app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
   try {
     const blurb = String(req.body?.blurb || '').trim();
     const files = req.files || [];
 
     if (!blurb) return res.status(400).json({ error: 'Missing blurb' });
-    if (files.length !== 3) return res.status(400).json({ error: 'Please upload exactly 3 images' });
+    if (files.length !== 4) return res.status(400).json({ error: 'Please upload exactly 4 images' });
 
     // buffers -> base64 data URLs
     const dataUrls = files.map((file) => {
@@ -107,7 +107,6 @@ app.post('/api/storyboard', upload.array('images', 3), async (req, res) => {
     const co = await resp.json();
     const text = (co?.message?.content || []).find((b) => b.type === 'text')?.text || '';
 
-    // Parse + normalize into { iconCategory, p1..p5 } (strip any extra fields)
     try {
       const raw = JSON.parse(text);
 
@@ -142,7 +141,6 @@ app.post('/api/storyboard', upload.array('images', 3), async (req, res) => {
         };
       }
 
-      // Guard: must have 5 complete panels (title + description)
       const ok = ['p1', 'p2', 'p3', 'p4', 'p5'].every(
         (k) => out[k]?.title && out[k]?.description
       );

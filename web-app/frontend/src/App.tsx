@@ -15,6 +15,7 @@ type Story = {
 };
 
 const PANEL_ORDER: Array<keyof Omit<Story, 'iconCategory'>> = ['p1','p2','p3','p4','p5'];
+const REQUIRED_IMAGES = 4;
 
 export default function App() {
   const [files, setFiles] = useState<FileList | null>(null);
@@ -34,8 +35,8 @@ export default function App() {
     setErr(null);
     setStory(null);
 
-    if (!files || files.length !== 3) {
-      setErr('Please select exactly 3 images.');
+    if (!files || files.length !== REQUIRED_IMAGES) {
+      setErr(`Please select exactly ${REQUIRED_IMAGES} images.`);
       return;
     }
     if (!blurb.trim()) {
@@ -75,11 +76,11 @@ export default function App() {
 
   return (
     <main style={{ maxWidth: 820, margin: '2rem auto', fontFamily: 'system-ui' }}>
-      <h1>Storyboard (images + Aya Vision)</h1>
+      <h1>Storyboard (4 images + Aya Vision)</h1>
 
       <form onSubmit={onSubmit} style={{ display: 'grid', gap: 12 }}>
         <label>
-          Pick 3 images:
+          Pick {REQUIRED_IMAGES} images:
           <input
             type="file"
             accept="image/*"
@@ -87,6 +88,10 @@ export default function App() {
             onChange={(e) => onPick(e.target.files)}
           />
         </label>
+
+        <div style={{ fontSize: 12, opacity: 0.7 }}>
+          Selected: {files?.length ?? 0} / {REQUIRED_IMAGES}
+        </div>
 
         <label>
           Trip blurb:
