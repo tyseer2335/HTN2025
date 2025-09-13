@@ -3,10 +3,14 @@ import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import { saveMemory, getAllMemories, getUserMemories, getMemoryById, getMemoryStats } from './db.js';
+import VAPIService from './services/VAPIService.js';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Serve generated audio files
+app.use('/audio', express.static('generated-audio'));
 
 const API_KEY = process.env.COHERE_API_KEY;
 if (!API_KEY) throw new Error('Set COHERE_API_KEY in .env');
@@ -151,40 +155,50 @@ app.post('/api/storyboard', upload.array('images', 3), async (req, res) => {
       const storyboard = JSON.parse(text);
       console.log('Storyboard JSON:\n', JSON.stringify(storyboard, null, 2)); // prints on server
 
+      // Generate audio narration with VAPI
+      console.log('🎤 Generating audio narration...');
+      const storyboardWithAudio = await VAPIService.generateStoryboardNarration(storyboard);
+
       // Save to MongoDB
       try {
         const memoryData = {
           id: `memory_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           userId: 'anonymous', // Can be updated when auth is added
-          title: storyboard.title || `Memory from ${new Date().toLocaleDateString()}`,
+          title: storyboardWithAudio.title || `Memory from ${new Date().toLocaleDateString()}`,
           description: blurb,
           theme: 'watercolor', // Default theme
-          storyboard: storyboard,
+          storyboard: storyboardWithAudio,
           originalImages: dataUrls.length, // Store count instead of actual URLs for size
           metadata: {
             aiModel: 'cohere-aya-vision',
+            audioModel: 'vapi-tts',
+            audioGenerated: storyboardWithAudio.audioNarrationComplete || false,
+            totalAudioFiles: storyboardWithAudio.totalAudioFiles || 0,
             processingTime: Date.now(),
-            version: '1.0'
+            version: '1.1'
           }
         };
 
         const savedMemory = await saveMemory(memoryData);
         console.log('💾 Memory saved to MongoDB:', savedMemory._id);
+        console.log(`🎵 Audio files generated: ${memoryData.metadata.totalAudioFiles}`);
 
         // Return enhanced response
         return res.json({
-          ...storyboard,
+          ...storyboardWithAudio,
           memoryId: savedMemory._id,
-          saved: true
+          saved: true,
+          audioGenerated: storyboardWithAudio.audioNarrationComplete || false
         });
 
       } catch (dbError) {
         console.error('MongoDB save failed:', dbError);
         // Still return the storyboard even if DB save fails
         return res.json({
-          ...storyboard,
+          ...storyboardWithAudio,
           saved: false,
-          saveError: 'Database unavailable'
+          saveError: 'Database unavailable',
+          audioGenerated: storyboardWithAudio.audioNarrationComplete || false
         });
       }
 
@@ -225,6 +239,50 @@ app.post('/api/test-memory', async (req, res) => {
     res.json({ success: true, message: 'MongoDB working!', memoryId: saved._id });
   } catch (error) {
     res.status(500).json({ error: 'MongoDB connection failed', details: error.message });
+  }
+});
+
+// VAPI health check endpoint
+app.get('/api/audio/health', async (req, res) => {
+  try {
+    const health = await VAPIService.checkHealth();
+    res.json(health);
+  } catch (error) {
+    res.status(500).json({ error: 'VAPI health check failed', details: error.message });
+  }
+});
+
+// Test VAPI audio generation
+app.post('/api/audio/test', async (req, res) => {
+  try {
+    const { text = 'This is a test of the voice narration system for memory storyboards.' } = req.body;
+
+    console.log('🎤 Testing VAPI audio generation...');
+    const audioUrl = await VAPIService.generateSpeech(text, {
+      voice: 'nova',
+      speed: 1.0
+    });
+
+    res.json({
+      success: true,
+      message: 'VAPI audio test completed',
+      text: text,
+      audioUrl: audioUrl,
+      fullUrl: `http://localhost:${process.env.PORT || 8787}${audioUrl}`
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: 'VAPI test failed', details: error.message });
+  }
+});
+
+// Get available voices
+app.get('/api/audio/voices', async (req, res) => {
+  try {
+    const voices = await VAPIService.getAvailableVoices();
+    res.json({ voices });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get voices', details: error.message });
   }
 });
 

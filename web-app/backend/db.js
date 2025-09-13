@@ -7,11 +7,20 @@ let db = null;
 
 export async function connectDB() {
   if (!client) {
-    console.log('Connecting to MongoDB...');
-    client = new MongoClient(MONGODB_URI);
-    await client.connect();
-    db = client.db('memory-gallery');
-    console.log('✅ Connected to MongoDB Atlas!');
+    try {
+      console.log('Connecting to MongoDB Atlas...');
+      client = new MongoClient(MONGODB_URI);
+      await client.connect();
+
+      // Test the connection
+      await client.db('admin').command({ ping: 1 });
+
+      db = client.db('memory-gallery');
+      console.log('✅ Connected to MongoDB Atlas successfully!');
+    } catch (error) {
+      console.error('❌ MongoDB connection failed:', error.message);
+      throw error;
+    }
   }
   return db;
 }
