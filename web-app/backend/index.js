@@ -1,3 +1,4 @@
+// backend/index.js
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
@@ -13,32 +14,45 @@ app.use(express.json());
 app.use('/audio', express.static('generated-audio'));
 
 const API_KEY = process.env.COHERE_API_KEY;
-if (!API_KEY) throw new Error('Set COHERE_API_KEY in .env');
+if (!API_KEY) throw new Error('Set COHERE_API_KEY in your .env');
 
 const MODEL = process.env.COHERE_MODEL || 'c4ai-aya-vision-32b';
 
-// Multer in-memory (we need file.buffer to build data URLs)
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { files: 3, fileSize: 5 * 1024 * 1024 }, // 5MB/file cap
+  limits: { files: 4, fileSize: 5 * 1024 * 1024 }, // <-- exactly 4 images
 });
 
-// === same builder as your working script (one message: [ text, img, img, img ]) ===
+// ONE message: text + 4 image blocks (panels have title + description)
 function buildMessage(blurb, dataUrls) {
   const textBlock = {
     type: 'text',
     text: [
       'You are an expert visual storyteller.',
-      'Using the 3 photos and the trip blurb, create a sequential 5-panel storyboard.',
+      'Using the 4 photos and the trip blurb, create a sequential 5-panel storyboard that reads like a mini travel narrative.',
       '',
-      'Each panel fields:',
-      '- id: p1..p5',
-      '- title: 2–6 words',
-      '- description: 60–120 words (subject, setting, POV/shot, lighting, color mood, time of day, notable props).',
-      '- keywords: 4–8 nouns/adjectives',
-      '- iconPrompt: short low-poly 3D icon idea',
+      'Return ONLY raw JSON (no markdown, no prose, no code fences).',
+      'Output EXACTLY in this shape (no extra fields):',
+      '{',
+      '  "iconCategory": "short low-poly 3D icon idea for the WHOLE story (e.g., \\"torii gate\\", \\"ramen bowl\\")",',
+      '  "p1": { "title": "...", "description": "..." },',
+      '  "p2": { "title": "...", "description": "..." },',
+      '  "p3": { "title": "...", "description": "..." },',
+      '  "p4": { "title": "...", "description": "..." },',
+      '  "p5": { "title": "...", "description": "..." }',
+      '}',
       '',
-      'Return ONLY raw JSON (no markdown).',
+      'Narrative rules (very important):',
+      '- Write a coherent, chronological story that progresses from p1 → p5.',
+      '- Use a 5-beat arc: (p1) setup & arrival, (p2) inciting moment, (p3) development, (p4) peak/climax, (p5) resolution/reflection.',
+      '- Keep a consistent voice (first-person past tense unless the blurb clearly uses third person).',
+      '- Each panel MUST explicitly connect to the previous one with a brief transition (e.g., "After leaving Shibuya...", "The next morning in Kyoto...", "Later that day...").',
+      '- Keep characters, time of day, and locations consistent across panels when implied by the photos/blurb.',
+      '',
+      'Description quality (each panel):',
+      '- 90–140 words with concrete visual details grounded in the photos.',
+      '- Include: who is present, where (specific place/setting), when (time of day/season), objective/emotion, a small conflict/surprise/decision, sensory details, and composition cues (POV/shot, framing, motion).',
+      '- End p1–p4 with a forward hook. End p5 with a reflective line that ties back to the trip's theme.',
       '',
       `TRIP BLURB: """${blurb}"""`,
     ].join('\n'),
@@ -46,7 +60,7 @@ function buildMessage(blurb, dataUrls) {
 
   const imageBlocks = dataUrls.map((d) => ({
     type: 'image_url',
-    image_url: { url: d }, // <— EXACT nested shape from the docs
+    image_url: { url: d },
   }));
 
   return [{ role: 'user', content: [textBlock, ...imageBlocks] }];
@@ -100,21 +114,16 @@ app.get('/api/memories/:id', async (req, res) => {
   }
 });
 
-/**
- * POST /api/storyboard
- * form-data:
- *  - blurb: string
- *  - images: exactly 3 files (field name "images")
- */
-app.post('/api/storyboard', upload.array('images', 3), async (req, res) => {
+// POST /api/storyboard  (form-data: blurb, images[4])
+app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
   try {
     const blurb = String(req.body?.blurb || '').trim();
     const files = req.files || [];
 
     if (!blurb) return res.status(400).json({ error: 'Missing blurb' });
-    if (files.length !== 3) return res.status(400).json({ error: 'Please upload exactly 3 images' });
+    if (files.length !== 4) return res.status(400).json({ error: 'Please upload exactly 4 images' });
 
-    // Convert uploaded files -> base64 data URLs (same as your working script)
+    // buffers -> base64 data URLs
     const dataUrls = files.map((file) => {
       const mime = file.mimetype || 'image/png';
       const b64 = file.buffer.toString('base64');
@@ -124,16 +133,13 @@ app.post('/api/storyboard', upload.array('images', 3), async (req, res) => {
     const body = {
       model: MODEL,
       messages: buildMessage(blurb, dataUrls),
-      temperature: 0.2,
-      max_tokens: 1500,
+      temperature: 0.35,
+      max_tokens: 1800,
     };
 
     const resp = await fetch('https://api.cohere.ai/v2/chat', {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${API_KEY}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { Authorization: `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
 
@@ -148,23 +154,65 @@ app.post('/api/storyboard', upload.array('images', 3), async (req, res) => {
       });
     }
 
-    const data = await resp.json();
-    const text = (data?.message?.content || []).find((b) => b.type === 'text')?.text || '';
+    const co = await resp.json();
+    const text = (co?.message?.content || []).find((b) => b.type === 'text')?.text || '';
 
     try {
-      const storyboard = JSON.parse(text);
-      console.log('Storyboard JSON:\n', JSON.stringify(storyboard, null, 2)); // prints on server
+      const raw = JSON.parse(text);
+
+      const toPanel = (p = {}) => ({
+        title: typeof p.title === 'string' ? p.title : '',
+        description: typeof p.description === 'string' ? p.description : '',
+      });
+
+      let normalizedStoryboard;
+      if (Array.isArray(raw.panels)) {
+        normalizedStoryboard = {
+          iconCategory:
+            raw.iconCategory || raw.globalIcon || raw.icon ||
+            (raw.panels.find((p) => typeof p.iconPrompt === 'string')?.iconPrompt) ||
+            'memory-orb',
+          p1: toPanel(raw.panels[0]),
+          p2: toPanel(raw.panels[1]),
+          p3: toPanel(raw.panels[2]),
+          p4: toPanel(raw.panels[3]),
+          p5: toPanel(raw.panels[4]),
+        };
+      } else {
+        normalizedStoryboard = {
+          iconCategory:
+            raw.iconCategory || raw.globalIcon || raw.icon ||
+            (raw?.p1?.iconPrompt ?? 'memory-orb'),
+          p1: toPanel(raw.p1),
+          p2: toPanel(raw.p2),
+          p3: toPanel(raw.p3),
+          p4: toPanel(raw.p4),
+          p5: toPanel(raw.p5),
+        };
+      }
+
+      const ok = ['p1', 'p2', 'p3', 'p4', 'p5'].every(
+        (k) => normalizedStoryboard[k]?.title && normalizedStoryboard[k]?.description
+      );
+      if (!ok) {
+        return res.status(502).json({
+          error: 'incomplete_story',
+          preview: text.slice(0, 400),
+        });
+      }
+
+      console.log('Storyboard JSON (normalized):\n', JSON.stringify(normalizedStoryboard, null, 2));
 
       // Generate audio narration with VAPI
       console.log('🎤 Generating audio narration...');
-      const storyboardWithAudio = await VAPIService.generateStoryboardNarration(storyboard);
+      const storyboardWithAudio = await VAPIService.generateStoryboardNarration(normalizedStoryboard);
 
       // Save to MongoDB
       try {
         const memoryData = {
           id: `memory_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           userId: 'anonymous', // Can be updated when auth is added
-          title: storyboardWithAudio.title || `Memory from ${new Date().toLocaleDateString()}`,
+          title: `Memory from ${new Date().toLocaleDateString()}`,
           description: blurb,
           theme: 'watercolor', // Default theme
           storyboard: storyboardWithAudio,
@@ -175,7 +223,7 @@ app.post('/api/storyboard', upload.array('images', 3), async (req, res) => {
             audioGenerated: storyboardWithAudio.audioNarrationComplete || false,
             totalAudioFiles: storyboardWithAudio.totalAudioFiles || 0,
             processingTime: Date.now(),
-            version: '1.1'
+            version: '2.0'
           }
         };
 
@@ -183,22 +231,27 @@ app.post('/api/storyboard', upload.array('images', 3), async (req, res) => {
         console.log('💾 Memory saved to MongoDB:', savedMemory._id);
         console.log(`🎵 Audio files generated: ${memoryData.metadata.totalAudioFiles}`);
 
-        // Return enhanced response
+        // Return enhanced response with both team format AND our enhancements
         return res.json({
-          ...storyboardWithAudio,
+          ...normalizedStoryboard, // Your team's expected format
           memoryId: savedMemory._id,
           saved: true,
-          audioGenerated: storyboardWithAudio.audioNarrationComplete || false
+          audioGenerated: storyboardWithAudio.audioNarrationComplete || false,
+          // Additional metadata for debugging
+          _meta: {
+            audioFiles: storyboardWithAudio.totalAudioFiles,
+            mongodb: true,
+            vapi: storyboardWithAudio.audioNarrationComplete
+          }
         });
 
       } catch (dbError) {
         console.error('MongoDB save failed:', dbError);
-        // Still return the storyboard even if DB save fails
+        // Still return the normalized storyboard even if DB save fails
         return res.json({
-          ...storyboardWithAudio,
+          ...normalizedStoryboard,
           saved: false,
-          saveError: 'Database unavailable',
-          audioGenerated: storyboardWithAudio.audioNarrationComplete || false
+          saveError: 'Database unavailable'
         });
       }
 
