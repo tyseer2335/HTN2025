@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Story Viewer</title>
+</head>
+<body>
+    <h1>Current Story</h1>
+    <button onclick="refreshStory()">Refresh</button>
+    <pre id="content"></pre>
+    
+    <script>
+        const STORY_URL = 'https://gist.githubusercontent.com/Tyseer2335/ed60aaca8ec7268ea0a28300d833f6cb/raw/story.json';
+        
+        async function refreshStory() {
+            try {
+                // Add timestamp to bypass browser cache
+                const response = await fetch(`${STORY_URL}?t=${Date.now()}`);
+                const data = await response.json();
+                document.getElementById('content').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('content').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // Load immediately
+        refreshStory();
+    </script>
+</body>
+</html>
