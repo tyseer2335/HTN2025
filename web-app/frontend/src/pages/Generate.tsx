@@ -5,7 +5,7 @@ import { PremiumCard, PremiumCardHeader, PremiumCardTitle, PremiumCardContent } 
 import { PremiumInput } from '@/components/ui/premium-input';
 import { PremiumTextarea } from '@/components/ui/premium-textarea';
 import { PremiumAlert, PremiumAlertTitle, PremiumAlertDescription } from '@/components/ui/premium-alert';
-import { Upload, FileCode, RefreshCw, AlertCircle, Image, ArrowLeft } from 'lucide-react';
+import { Upload, FileCode, RefreshCw, AlertCircle, Image, ArrowLeft, Paintbrush } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import scLogo from '@/assets/sc-logo.png';
 
@@ -25,9 +25,17 @@ type Story = {
 
 const REQUIRED_IMAGES = 4;
 
+const THEME_OPTIONS = [
+  { label: 'Ghibli', value: 'ghibli' },
+  { label: 'Watercolor', value: 'watercolor' },
+  { label: 'Comic', value: 'comic' },
+  { label: 'Cyber Punk', value: 'cyberpunk' },
+];
+
 const Generate = () => {
   const [description, setDescription] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState<FileList | null>(null);
+  const [selectedTheme, setSelectedTheme] = useState<string>('ghibli');
   const [isGenerating, setIsGenerating] = useState(false);
   const [story, setStory] = useState<Story | null>(null);
   const [error, setError] = useState('');
@@ -107,6 +115,7 @@ const Generate = () => {
     try {
       const fd = new FormData();
       fd.append('blurb', description);
+      fd.append('theme', selectedTheme);
       Array.from(uploadedFiles).forEach((f) => fd.append('images', f));
 
       const res = await fetch('http://localhost:8787/api/storyboard', {
@@ -145,7 +154,7 @@ const Generate = () => {
     } finally {
       setIsGenerating(false);
     }
-  }, [description, uploadedFiles, toast, navigate]);
+  }, [description, uploadedFiles, selectedTheme, toast, navigate]);
 
   const handleReset = useCallback(() => {
     setDescription('');
@@ -188,6 +197,7 @@ const Generate = () => {
         <div className="max-w-2xl mx-auto space-y-8">
           {/* Input Panel */}
           <div className="space-y-6">
+            {/* Description Section */}
             <div className="bg-surface rounded-xl border border-surface-hover p-8 animate-fade-in">
               <div className="mb-6">
                 <h2 className="flex items-center gap-3 text-xl font-semibold text-text-primary mb-2">
@@ -210,6 +220,33 @@ const Generate = () => {
                     showCounter
                     className="w-full"
                   />
+                </div>
+              </div>
+            </div>
+
+            {/* Theme Selection Section */}
+            <div className="bg-surface rounded-xl border border-surface-hover p-8 animate-fade-in">
+              <div className="mb-6">
+                <h2 className="flex items-center gap-3 text-xl font-semibold text-text-primary mb-2">
+                  <Paintbrush className="h-5 w-5 text-foreground" />
+                  Select a Theme
+                </h2>
+              </div>
+              <div className="space-y-6">
+                <div>
+                  <label htmlFor="theme" className="block text-sm font-medium text-text-primary mb-3">
+                    Choose a visual style for your storyboard
+                  </label>
+                  <select
+                    id="theme"
+                    value={selectedTheme}
+                    onChange={e => setSelectedTheme(e.target.value)}
+                    className="w-full rounded-lg border border-surface-hover bg-background px-4 py-3 text-base text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-accent"
+                  >
+                    {THEME_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
