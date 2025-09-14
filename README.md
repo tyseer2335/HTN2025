@@ -2,9 +2,15 @@
 
 **SpectraSphere** is a hackathon project built at Hack the North 2025. It transforms a handful of photos and a short trip description into a **five-panel, themed storyboard**. Each story feels like a mini comic flipbook, complete with captions and stylized visuals. You can view and share the generated story as an immersive AR experience.  
 
+SpectraSphere also integrates with **Snap Spectacles**:  
+- Open your generated story inside the glasses to view your panels in immersive AR.  
+- The glasses will **read the captions aloud** so the experience feels narrated.  
+- Alongside your story, the system generates a **3D interactive object** that symbolizes the trip (e.g. a ramen bowl for a food adventure, a torii gate for a Japan trip).  
+- This object floats in AR, and you can walk around it, tap it, or interact with it as a living memory anchor.  
+
 ---
 
-## ⚙️ Setup & Installation
+##⚙️ Setup & Installation
 
 ### 1. Clone the repo
 ```bash
@@ -98,7 +104,8 @@ npm run dev
    ```
    https://api.jsonbin.io/v3/b/<JSONBIN_ID>/latest?meta=false
    ```
-5. The frontend fetches this JSON and renders it as a flipbook in your chosen theme (Comic, Ghibli, Watercolor, Cyberpunk).
+5. The frontend fetches this JSON and renders it as a flipbook in your chosen theme (Comic, Ghibli, Watercolor, Cyberpunk).  
+6. Open the story in **Snap Spectacles** for a narrated AR flipbook + 3D memory object.
 
 ---
 
@@ -109,6 +116,7 @@ npm run dev
 - **AI Model:** Cohere Aya Vision (`c4ai-aya-vision-32b`)  
 - **Storage:** Jsonbin (stable public JSON endpoint)  
 - **Other Tools:** Lucide icons, custom premium-styled components  
+- **Hardware Integration:** Snap Spectacles (AR viewing, narration, 3D object generation)  
 
 ---
 
