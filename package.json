@@ -1,0 +1,32 @@
+{
+  "name": "spectrasphere-local-testing",
+  "version": "1.0.0",
+  "description": "Local testing environment for SpectraSphere Gemini API integration",
+  "main": "test-local.js",
+  "scripts": {
+    "test": "node test-local.js",
+    "test-api": "node test-gemini-api.js",
+    "test-image": "node test-image-generation.js",
+    "test-pipeline": "node test-complete-pipeline.js",
+    "install-deps": "npm install",
+    "setup": "npm run install-deps && npm run test"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "gemini",
+    "api",
+    "testing",
+    "spectrasphere",
+    "lens-studio"
+  ],
+  "author": "SpectraSphere Team",
+  "license": "MIT"
+}

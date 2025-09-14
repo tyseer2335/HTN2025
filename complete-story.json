@@ -1,0 +1,25 @@
+{
+  "title": "Generated Fantasy Story",
+  "text": "Elara, a wisp of a girl with hair like spun moonlight, ventured into Whisperwood, a forest humming with forgotten magic.  Ancient trees, their bark etched with glowing runes, watched her approach.  She sought the Sunpetal, a flower said to heal her ailing grandmother.  A mischievous sprite, flitting amongst iridescent mushrooms, offered guidance, leading Elara through shimmering glades and across babbling brooks.  Finally, bathed in ethereal sunlight, she found it – a single, radiant Sunpetal, its petals pulsing with life.  Elara, her heart brimming with hope, carefully plucked the flower, its magic already warming her hands.\n",
+  "imageUrl": "pipeline-story-image.jpg",
+  "animation": {
+    "duration": 4,
+    "zoomLevel": 1.08,
+    "panX": 0,
+    "panY": 0.02,
+    "depthScale": 0.02,
+    "animationType": "kenBurns",
+    "generatedParams": "Please provide the story image. I need to see the image to create appropriate animation parameters.  Once you provide the image, I can analyze its composition and suggest cinematic animation parameters in JSON format.  My analysis will consider elements like:\n\n* **Focal point:** Where the viewer's eye is naturally drawn.\n* **Composition:** Rule of thirds, leading lines, etc.\n* **Subject matter:**  The type of scene (landscape, portrait, action scene) will influence the animation.\n\nAfter you provide the image, I will return JSON like this (this is just an example, the actual values will depend on your image):\n\n```json\n{\n  \"duration\": 10,  // seconds\n  \""
+  },
+  "metadata": {
+    "generatedAt": "2025-09-14T05:03:03.607Z",
+    "apiVersion": "gemini-2.5-flash",
+    "prompt": "Write a short fantasy story about a magical forest in exactly 100 words. Include characters, setting, and a plot.",
+    "imagePrompt": "Create an illustration for this story: Elara, a wisp of a girl with hair like spun moonlight, ventured into Whisperwood, a forest humming with forgotten magic.  Ancient trees, their bark etched with glowing runes, watched her approach.  She sought the Sunpetal, a flower said to heal her ailing grandmother.  A mischievous sprite, flitting amongst iridescent mushrooms, offered guidance, leading Elara through shimmering glades and across babbling brooks.  Finally, bathed in ethereal sunlight, she found it – a single, radiant Sunpetal, its petals pulsing with life.  Elara, her heart brimming with hope, carefully plucked the flower, its magic already warming her hands.\n"
+  },
+  "lensStudio": {
+    "compatible": true,
+    "animationSystem": "SpectraSphere",
+    "version": "1.0.0"
+  }
+}

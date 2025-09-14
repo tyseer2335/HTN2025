@@ -1,0 +1,27 @@
+{
+  "panels": [
+    {
+      "id": "story-panel-1",
+      "type": "image",
+      "content": {
+        "imageUrl": "pipeline-story-image.jpg",
+        "text": "Elara, a wisp of a girl with hair like spun moonlight, ventured into Whisperwood, a forest humming with forgotten magic.  Ancient trees, their bark etched with glowing runes, watched her approach.  She sought the Sunpetal, a flower said to heal her ailing grandmother.  A mischievous sprite, flitting amongst iridescent mushrooms, offered guidance, leading Elara through shimmering glades and across babbling brooks.  Finally, bathed in ethereal sunlight, she found it – a single, radiant Sunpetal, its petals pulsing with life.  Elara, her heart brimming with hope, carefully plucked the flower, its magic already warming her hands.\n",
+        "duration": 4
+      },
+      "animation": {
+        "type": "kenBurns",
+        "duration": 4,
+        "zoomLevel": 1.08,
+        "panX": 0,
+        "panY": 0.02,
+        "depthScale": 0.02
+      }
+    }
+  ],
+  "metadata": {
+    "totalDuration": 4,
+    "panelCount": 1,
+    "generatedAt": "2025-09-14T05:03:03.608Z",
+    "system": "SpectraSphere Animation Pipeline"
+  }
+}

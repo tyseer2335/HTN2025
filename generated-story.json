@@ -1,0 +1,15 @@
+{
+  "title": "Generated Story",
+  "text": "Elara, a wisp of a girl with eyes like moss agates, ventured into Whisperwood, a forest humming with forgotten magic.  Ancient trees, their bark etched with glowing runes, towered over her. She sought the Sunpetal, a flower said to heal her ailing grandmother.  A grumpy wood sprite, gnarled and moss-covered, guarded the path.  He demanded a riddle's answer in exchange for passage.  Elara, recalling a forgotten lullaby, solved it.  The sprite, charmed, guided her to the Sunpetal, its petals radiating warmth, promising a cure.  Elara returned, heart brimming with hope, the forest's magic a blessing.\n",
+  "imageUrl": "pipeline-story-image.jpg",
+  "animation": {
+    "duration": 4,
+    "zoomLevel": 1.08,
+    "panX": 0,
+    "panY": 0.02,
+    "depthScale": 0.02,
+    "animationType": "kenBurns"
+  },
+  "generatedAt": "2025-09-14T05:03:32.630Z",
+  "apiVersion": "gemini-2.5-flash"
+}

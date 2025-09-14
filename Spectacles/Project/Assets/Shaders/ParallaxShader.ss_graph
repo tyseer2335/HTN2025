@@ -1,0 +1,59 @@
+// Parallax Shader for SpectraSphere Animation System
+// This shader provides Ken Burns and depth-based parallax effects
+
+// Inputs
+uniform sampler2D baseTex;        // Main image texture
+uniform sampler2D depthTex;       // Depth map texture (optional)
+uniform sampler2D maskTex;        // Mask texture (optional)
+uniform float depthScale;         // Depth parallax strength
+uniform float parallaxStrength;   // Overall parallax strength
+uniform float animationSpeed;     // Animation speed multiplier
+uniform float zoomLevel;          // Zoom level
+uniform float rotationAngle;      // Rotation angle
+uniform vec2 uvOffset;            // UV offset for panning
+uniform vec2 panOffset;           // Additional pan offset
+
+// Vertex shader
+void vertex() {
+    // Standard vertex transformation
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+
+// Fragment shader
+void fragment() {
+    // Get base UV coordinates
+    vec2 uv = vUv;
+    
+    // Apply zoom (center the zoom around 0.5, 0.5)
+    uv = (uv - 0.5) / zoomLevel + 0.5;
+    
+    // Apply rotation
+    float cosAngle = cos(rotationAngle);
+    float sinAngle = sin(rotationAngle);
+    vec2 center = vec2(0.5, 0.5);
+    uv = (uv - center) * mat2(cosAngle, -sinAngle, sinAngle, cosAngle) + center;
+    
+    // Apply pan offset
+    uv += uvOffset + panOffset;
+    
+    // Apply depth-based parallax if depth texture is available
+    if (depthTex != null) {
+        vec4 depthSample = texture2D(depthTex, vUv);
+        float depth = depthSample.r; // Assuming depth is in red channel
+        
+        // Create parallax offset based on depth
+        vec2 parallaxOffset = (depth - 0.5) * depthScale * parallaxStrength;
+        uv += parallaxOffset;
+    }
+    
+    // Apply mask if available
+    vec4 finalColor = texture2D(baseTex, uv);
+    
+    if (maskTex != null) {
+        vec4 maskSample = texture2D(maskTex, vUv);
+        finalColor.a *= maskSample.r; // Use red channel as alpha mask
+    }
+    
+    // Output final color
+    gl_FragColor = finalColor;
+}
