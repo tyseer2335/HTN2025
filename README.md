@@ -10,6 +10,17 @@ SpectraSphere also integrates with **Snap Spectacles**:
 
 ---
 
+## 🎥 Demo
+
+<p align="center">
+  <img src="assets/1.gif" width="45%" />
+  <img src="assets/2.gif" width="45%" /><br>
+  <img src="assets/3.gif" width="45%" />
+  <img src="assets/4.png" width="45%" />
+</p>
+
+---
+
 ## ⚙️ Setup & Installation
 
 ### 1. Clone the repo
@@ -127,4 +138,3 @@ npm run dev
 - Watercolor Travel Journal  
 - Cyberpunk Neon  
 
----
