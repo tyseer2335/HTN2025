@@ -29,7 +29,7 @@ metaInfo:
     []
   lensName: AI Playground
   lensDescriptors:
-    []
+    - EXPERIMENTAL_API
   lensApplicability:
     - Front
     - Back
