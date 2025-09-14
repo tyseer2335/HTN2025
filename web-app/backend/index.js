@@ -12,17 +12,14 @@ if (!API_KEY) throw new Error('Set COHERE_API_KEY in your .env');
 
 const MODEL = process.env.COHERE_MODEL || 'c4ai-aya-vision-32b';
 
-// jsonbin constants
-const BIN_ID = process.env.JSONBIN_ID || '68c663ff43b1c97be94262fa'; // fixed bin id
-const BIN_KEY = process.env.JSONBIN_KEY; // your X-Master-Key
+const BIN_ID = process.env.JSONBIN_ID || '68c663ff43b1c97be94262fa';
+const BIN_KEY = process.env.JSONBIN_KEY;
 
-// exactly 4 images, up to 5MB each
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { files: 4, fileSize: 5 * 1024 * 1024 },
 });
 
-// Build the prompt for Aya Vision (text + 4 image blocks)
 function buildMessage(blurb, dataUrls) {
   const textBlock = {
     type: 'text',
@@ -65,10 +62,8 @@ function buildMessage(blurb, dataUrls) {
   return [{ role: 'user', content: [textBlock, ...imageBlocks] }];
 }
 
-// Simple health
 app.get('/api/ping', (_req, res) => res.json({ ok: true }));
 
-// POST /api/storyboard  (form-data: blurb, images[4])
 app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
   try {
     const blurb = String(req.body?.blurb || '').trim();
@@ -77,14 +72,12 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
     if (!blurb) return res.status(400).json({ error: 'Missing blurb' });
     if (files.length !== 4) return res.status(400).json({ error: 'Please upload exactly 4 images' });
 
-    // buffers -> base64 data URLs
     const dataUrls = files.map((file) => {
       const mime = file.mimetype || 'image/png';
       const b64 = file.buffer.toString('base64');
       return `data:${mime};base64,${b64}`;
     });
 
-    // Call Cohere
     const body = {
       model: MODEL,
       messages: buildMessage(blurb, dataUrls),
@@ -119,7 +112,6 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
       return res.status(502).json({ error: 'invalid_json_from_model', preview: text.slice(0, 400) });
     }
 
-    // Normalize model JSON
     const toPanel = (p = {}) => ({
       title: typeof p?.title === 'string' ? p.title : '',
       description: typeof p?.description === 'string' ? p.description : '',
@@ -143,7 +135,6 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
       return res.status(502).json({ error: 'incomplete_story', preview: text.slice(0, 400) });
     }
 
-    // --- Publish to jsonbin ---
     const stringContent = JSON.stringify(normalizedStoryboard, null, 2);
 
     const jbResp = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
