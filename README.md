@@ -10,7 +10,7 @@ SpectraSphere also integrates with **Snap Spectacles**:
 
 ---
 
-##⚙️ Setup & Installation
+## ⚙️ Setup & Installation
 
 ### 1. Clone the repo
 ```bash
