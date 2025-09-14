@@ -12,7 +12,7 @@ const features = [
   {
     icon: Images,
     title: "Photo to Story",
-    description: "Upload 4 photos and watch them transform into a flipbook-style storyline."
+    description: "Upload 4 photos and watch them transform into a flipbook style storyline."
   },
   {
     icon: Sparkles,
