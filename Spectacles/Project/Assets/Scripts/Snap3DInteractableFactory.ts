@@ -20,10 +20,11 @@ export class Snap3DInteractableFactory extends BaseScriptComponent {
   runOnTap: boolean = false;
 
   @input
-  snap3DInteractablePrefab: ObjectPrefab;
-
+  snap3DInteractablePrefab: ObjectPrefab;z
   private avaliableToRequest: boolean = true;
   private wcfmp = WorldCameraFinderProvider.getInstance();
+
+
 
   onAwake() {
     this.createEvent("TapEvent").bind(() => {

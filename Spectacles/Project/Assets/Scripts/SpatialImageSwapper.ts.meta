@@ -1,0 +1,47 @@
+- !<AssetImportMetadata/abb947fc-6296-449b-84ca-3883a4b701bb>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 44099737-6ee8-4f8a-90c6-8392f7ad2d30
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 44099737-6ee8-4f8a-90c6-8392f7ad2d30
+  PackageType: NotAPackage
+  PackagePolicy: CannotBeUnpacked
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 8fbca433-f5a7-4ec1-b2df-394fa8949a36
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/8fbca433-f5a7-4ec1-b2df-394fa8949a36>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: ee7e09a1-df6a-46ed-8e7e-63a9a868c6bc
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  CurrentVisibility: Editable
+  MaxVisibility: Editable
+  ScriptInputsHidden:
+    autoSwapToSpatialized: false
+    flatImage: false
+    spatializer: false
+  ScriptTypesHidden:
+    SpatialImage: false
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  DefaultScriptInputs:
+    - spatializer: !<Typename.SpatialImage> 00000000-0000-0000-0000-000000000000
+      flatImage: !<reference.Image> 00000000-0000-0000-0000-000000000000
+      autoSwapToSpatialized: false
+  ScriptTypes:
+    - SpatialImage: !<reference.ScriptAsset> 00000000-0000-0000-0000-000000000000
+  InputLines:
+    - // @typename SpatialImage
+    - // @input SpatialImage spatializer
+    - // @input Component.Image flatImage
+    - // @input bool autoSwapToSpatialized

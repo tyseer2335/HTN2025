@@ -1,0 +1,54 @@
+- !<AssetImportMetadata/32be2cea-34c6-422e-96f0-024fa4b9a693>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 96596196-8bd4-4d31-a50c-53c4840a2efd
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 96596196-8bd4-4d31-a50c-53c4840a2efd
+  PackageType: NotAPackage
+  PackagePolicy: CannotBeUnpacked
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 4e23fc80-a780-4cac-b903-bb645a5cd2da
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/4e23fc80-a780-4cac-b903-bb645a5cd2da>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 67f871c2-2c23-4715-bde0-d6bdc989575d
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  CurrentVisibility: Editable
+  MaxVisibility: Editable
+  ScriptInputsHidden:
+    frame: false
+    gallery: false
+    image: false
+    loadingIndicator: false
+    shuffle: false
+  ScriptTypesHidden:
+    SpatialImage: false
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  DefaultScriptInputs:
+    - frame: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      image: !<Typename.SpatialImage> 00000000-0000-0000-0000-000000000000
+      loadingIndicator: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      gallery: !<reference.Texture[]>
+        []
+      shuffle: false
+  ScriptTypes:
+    - SpatialImage: !<reference.ScriptAsset> 00000000-0000-0000-0000-000000000000
+  InputLines:
+    - // @typename SpatialImage
+    - // @input AssignableType frame
+    - // @input SpatialImage image
+    - // @input AssignableType_1 loadingIndicator
+    - "// @input Asset.Texture[] gallery"
+    - // @input bool shuffle

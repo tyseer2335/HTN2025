@@ -28,40 +28,76 @@
   MaxVisibility: Editable
   ScriptInputsHidden:
     apiEndpoint: false
+    baseImageOffset: false
     buttonMaterial: false
     buttonText: false
-    dotAppearDuration: false
     dotOffset: false
+    enableNarration: false
     generateButton: false
-    initialDot: false
+    generatedImageDisplay: false
+    horizontalSpacing: false
+    imageDisplays: false
     internetModule: false
-    lineExpandDuration: false
-    lineTargetLength: false
-    lineVisual: false
-    particleDuration: false
+    maxCharsPerLine: false
+    maxTextWidth: false
+    narratorVoice: false
+    narratorVolume: false
+    nextImageButton: false
+    nextImageButtonText: false
     particlesObject: false
+    promptTextColor: false
+    promptTextSize: false
+    promptTexts: false
     snap3DFactory: false
+    speechPitch: false
+    speechRate: false
     statusDisplay: false
+    textVerticalOffset: false
+    ttsAudioComponent: false
+    ttsModule: false
+    ttsPace: false
+    ttsVoiceName: false
+    ttsVoiceStyle: false
+    useImageDisplay: false
   ScriptTypesHidden:
     {}
   ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
   DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
   DefaultScriptInputs:
     - generateButton: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
-      initialDot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
-      lineVisual: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
       buttonText: !<reference.Text> 00000000-0000-0000-0000-000000000000
       statusDisplay: !<reference.Text> 00000000-0000-0000-0000-000000000000
       buttonMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
       internetModule: !<reference.InternetModule> 00000000-0000-0000-0000-000000000000
       apiEndpoint: "https://jsonplaceholder.typicode.com/posts/1"
       snap3DFactory: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
-      dotAppearDuration: 0.800000
-      lineExpandDuration: 0.600000
-      lineTargetLength: 0.600000
       dotOffset: !<Vec3> {x: 0.000000, y: 0.060000, z: 0.000000}
       particlesObject: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
-      particleDuration: 0.750000
+      generatedImageDisplay: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      useImageDisplay: true
+      imageDisplays: !<reference.SceneObject[]>
+        []
+      horizontalSpacing: 0.400000
+      baseImageOffset: !<Vec3> {x: 0.300000, y: 0.000000, z: 0.000000}
+      nextImageButton: !<MappingBased.AssignableType_2> 00000000-0000-0000-0000-000000000000
+      nextImageButtonText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      promptTexts: !<reference.Text[]>
+        []
+      textVerticalOffset: -0.150000
+      promptTextColor: !<Vec4> {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+      promptTextSize: 0.800000
+      maxTextWidth: 0.300000
+      maxCharsPerLine: !<float> 60.000000
+      ttsModule: !<reference.TextToSpeechModule> 00000000-0000-0000-0000-000000000000
+      ttsAudioComponent: !<reference.AudioComponent> 00000000-0000-0000-0000-000000000000
+      ttsVoiceName: Sasha
+      ttsVoiceStyle: !<float> 1.000000
+      ttsPace: !<float> 1.000000
+      enableNarration: true
+      narratorVoice: female
+      speechRate: !<float> 1.000000
+      speechPitch: !<float> 1.000000
+      narratorVolume: 0.800000
   ScriptTypes:
     -
       {}
@@ -69,8 +105,6 @@
     - '// @ui {"widget":"separator"}'
     - '// @ui {"widget":"label", "label":"Story Viewer - Phase 1: Initial Dot"}'
     - '// @input AssignableType generateButton {"hint":"Button to trigger the story generation sequence"}'
-    - '// @input SceneObject initialDot {"hint":"Initial dot that appears when generation starts"}'
-    - '// @input SceneObject lineVisual {"hint":"Optional: line visual that will be scaled to form a line"}'
     - '// @input Component.Text buttonText {"hint":"Optional: Text component on button for state feedback"}'
     - '// @input Component.Text statusDisplay {"hint":"Optional: Status display text"}'
     - '// @input Asset.Material buttonMaterial {"hint":"Optional: Material for button color changes"}'
@@ -81,9 +115,38 @@
     - // @input AssignableType_1 snap3DFactory
     - '// @ui {"widget":"separator"}'
     - '// @ui {"widget":"label", "label":"Phase 1 Configuration"}'
-    - '// @input float dotAppearDuration = 0.8 {"hint":"Duration for initial dot appearance (in seconds)"}'
-    - '// @input float lineExpandDuration = 0.6 {"hint":"Duration for line expansion (in seconds)"}'
-    - '// @input float lineTargetLength = 0.6 {"hint":"Length the line should expand to (local scale X)"}'
     - '// @input vec3 dotOffset = {0,0.06,0} {"hint":"Local offset from button top where the dot should appear"}'
     - // @input SceneObject particlesObject
-    - // @input float particleDuration = 5
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"Image Display Configuration"}'
+    - '// @input SceneObject generatedImageDisplay {"hint":"SceneObject with Image component to display generated image"}'
+    - '// @input bool useImageDisplay = true {"hint":"Enable/disable image display"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"Multiple Image Configuration"}'
+    - '// @input SceneObject[] imageDisplays = {} {"hint":"Array of 5 SceneObjects with Image components for displaying story images"}'
+    - '// @input float horizontalSpacing = 0.4 {"hint":"Horizontal spacing between images"}'
+    - '// @input vec3 baseImageOffset = {0.3,0,0} {"hint":"Base offset position for the first image"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"Image Navigation"}'
+    - '// @input AssignableType_2 nextImageButton {"hint":"Button to generate/show next image"}'
+    - '// @input Component.Text nextImageButtonText {"hint":"Text component on next image button"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"Text Display Configuration"}'
+    - '// @input Component.Text[] promptTexts = {} {"hint":"Array of 5 Text components to display prompts below images"}'
+    - '// @input float textVerticalOffset = -0.15 {"hint":"Vertical offset for text below images"}'
+    - '// @input vec4 promptTextColor = {1,1,1,1} {"hint":"Text color for prompts"}'
+    - '// @input float promptTextSize = 0.8 {"hint":"Text size for prompts"}'
+    - '// @input float maxTextWidth = 0.3 {"hint":"Maximum width for text wrapping (in world units)"}'
+    - '// @input float maxCharsPerLine = 60 {"hint":"Maximum number of characters per line for manual wrapping"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"Text-to-Speech Configuration"}'
+    - '// @input Asset.TextToSpeechModule ttsModule {"hint":"TextToSpeechModule from the TTS asset"}'
+    - '// @input Component.AudioComponent ttsAudioComponent {"hint":"AudioComponent to play TTS audio"}'
+    - "// @input string ttsVoiceName = \"Sasha\" {\"hint\":\"TTS Voice Name (e.g., 'Sasha', 'Sam')\"}"
+    - '// @input float ttsVoiceStyle = 1 {"hint":"TTS Voice Style (0-3 for different styles)"}'
+    - '// @input float ttsPace = 1 {"hint":"TTS Speech Pace (0.5 = slow, 1.0 = normal, 2.0 = fast)"}'
+    - '// @input bool enableNarration = true {"hint":"Enable/disable AI narration"}'
+    - "// @input string narratorVoice = \"Sasha\" {\"hint\":\"Voice for narration (e.g., 'female', 'male')\"}"
+    - '// @input float speechRate = 1 {"hint":"Speech rate (0.5 = slow, 1.0 = normal, 2.0 = fast)"}'
+    - '// @input float speechPitch = 1 {"hint":"Speech pitch (0.5 = low, 1.0 = normal, 2.0 = high)"}'
+    - '// @input float narratorVolume = 0.8 {"hint":"Volume for narration (0.0 to 1.0)"}'

@@ -1,0 +1,41 @@
+- !<AssetImportMetadata/a132ae90-610e-4288-9f58-f64da42829f5>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> df33f16b-e617-4a7e-a56c-3173cf1a786b
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> df33f16b-e617-4a7e-a56c-3173cf1a786b
+  PackageType: NotAPackage
+  PackagePolicy: CannotBeUnpacked
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> c135cad1-9ce0-4895-a3ee-491b78a87b34
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/c135cad1-9ce0-4895-a3ee-491b78a87b34>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 6b997b88-9948-4a7e-8085-08e19442f943
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  CurrentVisibility: Editable
+  MaxVisibility: Editable
+  ScriptInputsHidden:
+    progressionSpeed: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  DefaultScriptInputs:
+    - progressionSpeed: 0.300000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input float progressionSpeed = 0.3

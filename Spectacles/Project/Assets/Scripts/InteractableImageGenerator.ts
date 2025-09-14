@@ -33,6 +33,8 @@ export class InteractableImageGenerator extends BaseScriptComponent {
   private originalButtonColor: vec4;
   private isGenerating: boolean = false;
 
+  
+
   onAwake() {
     this.imageGenerator = new ImageGenerator(this.modelProvider);
     let imgMat = this.image.mainMaterial.clone();

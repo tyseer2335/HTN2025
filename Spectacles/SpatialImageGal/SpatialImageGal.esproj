@@ -1,0 +1,57 @@
+studioVersion:
+  major: 5
+  minor: 12
+  patch: 1
+  build: 25080420
+  type: Public
+coreVersion: 321
+clientVersion: 13.500000
+updateCheckpoint: 68
+sceneId: 0a1ccb1a-fe88-4fbb-9883-e3af3c75fd99
+viewConfig:
+  simulation:
+    device: Spectacles (2024)
+    cameraFov: nan
+    fullFrameAspect: 0.666660
+    resolutionScale: 1.000000
+    viewport: Maximized
+    output: Live
+    stereoOutputEye: Center
+    deviceTypeOverride: Unknown
+    tint: true
+    screenshot: false
+    videoScreenRecord: false
+  cameraType: Back
+metaInfo:
+  hints:
+    []
+  tags:
+    []
+  lensName: Spatial Gallery
+  lensDescriptors:
+    []
+  lensApplicability:
+    - Front
+    - Back
+  lensClientCompatibilities:
+    - Spectacles
+  platformBundlesEnabled: false
+  iconHash: ""
+  videoPreviewHash: ""
+  fromTemplateName: Spatial Image Gallery
+  fromTemplateUrl: Lens Studio 5.12.1.25080420
+  activationCamera: Front
+  sourceMapEnabled: false
+  usingMinClientVersions: false
+  androidMinClientVersion:
+    major: 0
+    minor: 0
+    patch: 0
+    build: 0
+  iOSMinClientVersion:
+    major: 0
+    minor: 0
+    patch: 0
+    build: 0
+  documentId: f6e5708b-9838-4630-8ad2-0b390695d771
+  originalDocumentId: f6e5708b-9838-4630-8ad2-0b390695d771

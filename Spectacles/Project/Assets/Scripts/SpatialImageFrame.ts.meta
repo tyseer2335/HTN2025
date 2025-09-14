@@ -1,0 +1,53 @@
+- !<AssetImportMetadata/1f30a2e4-f661-4f40-8f9e-fe05b6333dda>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> eb57ca23-93c6-413f-afdf-f09036272787
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> eb57ca23-93c6-413f-afdf-f09036272787
+  PackageType: NotAPackage
+  PackagePolicy: CannotBeUnpacked
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> d4ab341f-94a2-4df3-93e1-df55c5eb414d
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/d4ab341f-94a2-4df3-93e1-df55c5eb414d>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 361a0b26-2875-44e9-b837-c0eae41a5b77
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  CurrentVisibility: Editable
+  MaxVisibility: Editable
+  ScriptInputsHidden:
+    camera: false
+    container: false
+    imageTexture: false
+    spatialImageSwapper: false
+    spatializer: false
+  ScriptTypesHidden:
+    SpatialImage: false
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  DefaultScriptInputs:
+    - container: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      spatializer: !<Typename.SpatialImage> 00000000-0000-0000-0000-000000000000
+      spatialImageSwapper: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      camera: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      imageTexture: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    - SpatialImage: !<reference.ScriptAsset> 00000000-0000-0000-0000-000000000000
+  InputLines:
+    - // @typename SpatialImage
+    - // @input AssignableType container
+    - // @input SpatialImage spatializer
+    - // @input AssignableType_1 spatialImageSwapper
+    - // @input SceneObject camera
+    - // @input Asset.Texture imageTexture

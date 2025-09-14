@@ -1,0 +1,50 @@
+- !<AssetImportMetadata/5652c501-f617-4668-9317-8bdb61e9c403>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 49c44be6-73ef-4bfe-95a3-5e76221e5688
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 49c44be6-73ef-4bfe-95a3-5e76221e5688
+  PackageType: NotAPackage
+  PackagePolicy: CannotBeUnpacked
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 176e99d9-af57-46e5-8855-220e72c04113
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/176e99d9-af57-46e5-8855-220e72c04113>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 6ea781d0-5ec1-495d-a9bb-1d32035dd314
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  CurrentVisibility: Editable
+  MaxVisibility: Editable
+  ScriptInputsHidden:
+    angleValidator: false
+    animateSpeed: false
+    minDepth: false
+    spatializer: false
+  ScriptTypesHidden:
+    SpatialImage: false
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  DefaultScriptInputs:
+    - spatializer: !<Typename.SpatialImage> 00000000-0000-0000-0000-000000000000
+      angleValidator: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      animateSpeed: 0.500000
+      minDepth: 0.050000
+  ScriptTypes:
+    - SpatialImage: !<reference.ScriptAsset> 00000000-0000-0000-0000-000000000000
+  InputLines:
+    - // @typename SpatialImage
+    - // @input SpatialImage spatializer
+    - // @input AssignableType angleValidator
+    - // @input float animateSpeed = 0.5
+    - // @input float minDepth = 0.05
