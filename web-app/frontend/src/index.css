@@ -1,68 +1,113 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+/* Snapchat Yellow & White Theme Design System */
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
+@layer base {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    /* Snapchat Design Language Colors */
+    --background: 0 0% 100%;  /* #ffffff - white */
+    --foreground: 0 0% 0%; /* #000000 - black */
+    
+    --surface: 0 0% 98%;    /* very light gray */
+    --surface-hover: 0 0% 95%;  /* light gray */
+    --surface-active: 0 0% 90%; /* medium light gray */
+    
+    --text-primary: 0 0% 0%;  /* #000000 - black */
+    --text-secondary: 0 0% 40%; /* #666666 - muted gray */
+    --text-muted: 0 0% 60%;  /* #999999 - lighter gray */
+    
+    /* Snapchat Brand Colors */
+    --snapchat-yellow: 59 100% 50%;  /* #FFFC00 */
+    --snapchat-yellow-light: 59 100% 95%; /* very light yellow */
+    --snapchat-yellow-dark: 59 100% 45%;  /* slightly darker yellow */
+    
+    /* Blue Accent */
+    --blue-accent: 202 100% 47%; /* #00A2F2 */
+    
+    /* Component Colors */
+    --card: var(--surface);
+    --card-foreground: var(--text-primary);
+    
+    --primary: var(--foreground); /* black for primary buttons */
+    --primary-foreground: var(--background); /* white text */
+    
+    --secondary: var(--background); /* white for secondary buttons */
+    --secondary-foreground: var(--foreground); /* black text */
+    
+    --muted: var(--surface-hover);
+    --muted-foreground: var(--text-secondary);
+    
+    --accent: var(--snapchat-yellow);
+    --accent-foreground: var(--foreground);
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: var(--background);
+    
+    --border: var(--surface-hover);
+    --input: var(--surface-hover);
+    --ring: var(--snapchat-yellow);
+    
+    --radius: 0.75rem;
+    
+    /* Snapchat Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--snapchat-yellow)), hsl(var(--snapchat-yellow-dark)));
+    --gradient-text: linear-gradient(135deg, hsl(var(--snapchat-yellow)), hsl(var(--snapchat-yellow-dark)));
+    --gradient-border: linear-gradient(135deg, hsl(var(--snapchat-yellow) / 0.3), hsl(var(--snapchat-yellow-dark) / 0.3));
+    
+    /* Snapchat Shadows */
+    --shadow-glow: 0 0 40px hsl(var(--snapchat-yellow) / 0.4);
+    --shadow-premium: 0 25px 50px -12px hsl(var(--snapchat-yellow) / 0.2);
+    --shadow-card: 0 8px 30px hsl(var(--snapchat-yellow) / 0.1);
   }
-  a:hover {
-    color: #747bff;
+}
+
+@layer base {
+  * {
+    @apply border-border;
   }
-  button {
-    background-color: #f9f9f9;
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Focus styles for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-blue-accent ring-offset-2 ring-offset-background;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-surface;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-hover rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-surface-active;
+  }
+}
+
+@layer components {
+  /* Blue link utility */
+  .link-blue {
+    @apply text-blue-accent hover:underline transition-all duration-200;
+  }
+  
+  /* Yellow highlight utility */
+  .highlight-yellow {
+    @apply bg-snapchat-yellow text-foreground;
   }
 }

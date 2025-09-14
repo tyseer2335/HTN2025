@@ -1,12 +1,10 @@
-// backend/index.js
+
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import { publishGist } from './gist.js';
 
-// If your Node version < 18, uncomment the next line:
-// import fetch from 'node-fetch';
 
 const app = express();
 app.use(cors());
