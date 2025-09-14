@@ -75,6 +75,9 @@ export class StoryViewer extends BaseScriptComponent {
   @input
   @hint("Local offset from button top where the dot should appear")
   private dotOffset: vec3 = new vec3(0, 0.06, 0);
+
+@input private particlesObject: SceneObject;
+@input private particleDuration: number = 5; // seconds
   
   // Internal state
   private isAnimating: boolean = false;
@@ -314,6 +317,31 @@ private setupScaleMonitoring(sceneObject: SceneObject) {
   });
 }
 
+private triggerParticleEffect(): void {
+  if (!this.particlesObject) {
+    print("triggerParticleEffect: assign 'particlesObject' in the Inspector");
+    return;
+  }
+
+  // If you want the burst at the newly created 3D model:
+  if (this.created3DObject) {
+    const pos = this.created3DObject.getTransform().getWorldPosition();
+    this.particlesObject.getTransform().setWorldPosition(pos);
+  }
+
+  // Turn on for a short window
+  this.particlesObject.enabled = true;
+
+  const ev = this.createEvent("DelayedCallbackEvent");
+  ev.bind(() => {
+    this.particlesObject.enabled = false;
+    print("StoryViewer: particle effect disabled after 5 seconds");
+  });
+  ev.reset(1.25);  // 5 seconds delay
+
+  print("StoryViewer: particle burst fired");
+}
+
 // Called when scale threshold is reached
 private onScaleThresholdReached() {
   if (this.hasTriggeredExpansion) return; // Prevent multiple triggers
@@ -321,7 +349,7 @@ private onScaleThresholdReached() {
   this.hasTriggeredExpansion = true;
   
   print("StoryViewer: 3D object scaled big enough!");
-  
+
   // Stop rotation when threshold is reached
   if (this.updateEvent) {
     this.updateEvent.enabled = false;
@@ -338,9 +366,16 @@ private onScaleThresholdReached() {
   if (this.statusDisplay) {
     this.statusDisplay.text = "Scale threshold reached! Story expanding...";
   }
+
+  this.triggerParticleEffect();
   
   // Trigger story expansion
-  this.expandStory();
+  const delayedExpansion = this.createEvent("DelayedCallbackEvent");
+  delayedExpansion.bind(() => {
+    this.expandStory();
+    this.created3DObject.enabled = false;
+  });
+  delayedExpansion.reset(0.1); // 0.5 second delay
 }
 
 // Fallback method for devices that don't support ManipulateComponent

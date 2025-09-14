@@ -10,9 +10,15 @@
     - !<own> 35656999-dc6e-4217-b855-5c3d6efa29ed
     - !<own> 87c14721-b72e-4e8a-b038-59044dec6af8
     - !<own> eef67181-a72e-4098-b10a-5cbfc9d0452e
+    - !<own> 4e17f8bc-91f2-47ad-b0b1-15f0714c1c51
+    - !<own> c98132d5-0bdc-42ea-a441-1ebcaef47a8e
   layers: !<Layers/267ee9a7-aff2-4f9d-9a49-f71214747d03>
     userLayers:
-      []
+      - |
+        id: 1
+        name: Layer 1
+        color: 0
+
     HasOrtho: true
   RenderOutput: !<reference> 923415f5-4245-4675-ade1-6d69d6d23e71
   RenderPreviewOutput: !<reference> 923415f5-4245-4675-ade1-6d69d6d23e71
@@ -2170,6 +2176,22 @@
     - !<own> 25a5160c-dd09-4e72-9e5d-156e2f82f869
   Components:
     []
+- !<SceneObject/4e17f8bc-91f2-47ad-b0b1-15f0714c1c51>
+  PrefabRemaps:
+    - 4e17f8bc-91f2-47ad-b0b1-15f0714c1c51: de55f798-9949-438d-a4fe-55fefe471afd
+    - ade952c5-815c-4757-9b5f-6020643ab210: 91ae5a14-9ddd-4b05-a1c9-03094a35160a
+  Name: BokehVFX
+  Enabled: false
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: -40.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> ade952c5-815c-4757-9b5f-6020643ab210
 - !<ScriptComponent/4e47218b-6890-4aa4-b84d-2b8c4b8fea14>
   PrefabRemaps:
     []
@@ -3042,6 +3064,19 @@
     Fingers_length: 0.000000
     Thumb_inflate: 0.000000
     Thumb_length: 0.000000
+- !<VFXComponent/7494402a-0ea3-4162-8a23-917a4ab26f03>
+  PrefabRemaps:
+    []
+  Name: VFX
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  VFXAsset: !<reference> 2e48adfa-ec86-4cdf-a6b0-42eb61e8823d
 - !<SceneObject/75eac7db-40ff-4ca6-b632-2be1547ca6a6>
   PrefabRemaps:
     []
@@ -4124,6 +4159,19 @@
   ScriptTypes:
     "":
       {}
+- !<VFXComponent/ade952c5-815c-4757-9b5f-6020643ab210>
+  PrefabRemaps:
+    []
+  Name: VFX Component
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  VFXAsset: !<reference> 593af536-48ff-4c8d-8445-47d7f33b9fe1
 - !<SceneObject/af1f37ee-22ea-45a4-b833-bf90f24f074b>
   PrefabRemaps:
     []
@@ -4823,6 +4871,22 @@
     - !<own> d3340ef4-90e8-49c1-aeb6-4194ed9937f9
   Components:
     []
+- !<SceneObject/c98132d5-0bdc-42ea-a441-1ebcaef47a8e>
+  PrefabRemaps:
+    - 7494402a-0ea3-4162-8a23-917a4ab26f03: ca560dff-9c04-43c6-9ffc-84c66b0dbc02
+    - c98132d5-0bdc-42ea-a441-1ebcaef47a8e: d84a3979-f541-404e-a926-eff6a26ebaa2
+  Name: Confetti
+  Enabled: false
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 7494402a-0ea3-4162-8a23-917a4ab26f03
 - !<SceneObject/cb723e33-4a15-4f02-82d2-7e80299b1395>
   PrefabRemaps:
     []
@@ -5774,6 +5838,7 @@
     dotAppearDuration: true
     lineExpandDuration: true
     lineTargetLength: true
+    particleDuration: true
   ScriptTypesDefault:
     {}
   ScriptInputs:
@@ -5791,6 +5856,8 @@
       lineExpandDuration: 0.600000
       lineTargetLength: 0.600000
       dotOffset: !<Vec3> {x: 0.000000, y: 20.000000, z: 0.000000}
+      particlesObject: !<reference.SceneObject> c98132d5-0bdc-42ea-a441-1ebcaef47a8e
+      particleDuration: 0.750000
   ScriptTypes:
     "":
       {}

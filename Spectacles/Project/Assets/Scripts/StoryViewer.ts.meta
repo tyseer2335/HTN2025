@@ -38,6 +38,8 @@
     lineExpandDuration: false
     lineTargetLength: false
     lineVisual: false
+    particleDuration: false
+    particlesObject: false
     snap3DFactory: false
     statusDisplay: false
   ScriptTypesHidden:
@@ -58,6 +60,8 @@
       lineExpandDuration: 0.600000
       lineTargetLength: 0.600000
       dotOffset: !<Vec3> {x: 0.000000, y: 0.060000, z: 0.000000}
+      particlesObject: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      particleDuration: 0.750000
   ScriptTypes:
     -
       {}
@@ -81,3 +85,5 @@
     - '// @input float lineExpandDuration = 0.6 {"hint":"Duration for line expansion (in seconds)"}'
     - '// @input float lineTargetLength = 0.6 {"hint":"Length the line should expand to (local scale X)"}'
     - '// @input vec3 dotOffset = {0,0.06,0} {"hint":"Local offset from button top where the dot should appear"}'
+    - // @input SceneObject particlesObject
+    - // @input float particleDuration = 5
