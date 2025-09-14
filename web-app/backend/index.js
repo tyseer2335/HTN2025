@@ -1,10 +1,7 @@
-
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
-import { publishGist } from './gist.js';
-
 
 const app = express();
 app.use(cors());
@@ -14,6 +11,10 @@ const API_KEY = process.env.COHERE_API_KEY;
 if (!API_KEY) throw new Error('Set COHERE_API_KEY in your .env');
 
 const MODEL = process.env.COHERE_MODEL || 'c4ai-aya-vision-32b';
+
+// jsonbin constants
+const BIN_ID = process.env.JSONBIN_ID || '68c663ff43b1c97be94262fa'; // fixed bin id
+const BIN_KEY = process.env.JSONBIN_KEY; // your X-Master-Key
 
 // exactly 4 images, up to 5MB each
 const upload = multer({
@@ -111,94 +112,66 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
     const co = await resp.json();
     const text = (co?.message?.content || []).find((b) => b.type === 'text')?.text || '';
 
-    // Normalize model JSON to your strict shape
-    const raw = JSON.parse(text);
+    let raw;
+    try {
+      raw = JSON.parse(text);
+    } catch (e) {
+      return res.status(502).json({ error: 'invalid_json_from_model', preview: text.slice(0, 400) });
+    }
 
+    // Normalize model JSON
     const toPanel = (p = {}) => ({
       title: typeof p?.title === 'string' ? p.title : '',
       description: typeof p?.description === 'string' ? p.description : '',
     });
 
-    let normalizedStoryboard;
-    if (Array.isArray(raw.panels)) {
-      normalizedStoryboard = {
-        iconCategory:
-          raw.iconCategory || raw.globalIcon || raw.icon ||
-          (raw.panels.find((p) => typeof p?.iconPrompt === 'string')?.iconPrompt) ||
-          'memory-orb',
-        p1: toPanel(raw.panels[0]),
-        p2: toPanel(raw.panels[1]),
-        p3: toPanel(raw.panels[2]),
-        p4: toPanel(raw.panels[3]),
-        p5: toPanel(raw.panels[4]),
-      };
-    } else {
-      normalizedStoryboard = {
-        iconCategory:
-          raw.iconCategory || raw.globalIcon || raw.icon ||
-          (raw?.p1?.iconPrompt ?? 'memory-orb'),
-        p1: toPanel(raw.p1),
-        p2: toPanel(raw.p2),
-        p3: toPanel(raw.p3),
-        p4: toPanel(raw.p4),
-        p5: toPanel(raw.p5),
-      };
-    }
+    const normalizedStoryboard = {
+      iconCategory:
+        raw.iconCategory || raw.globalIcon || raw.icon ||
+        (raw?.p1?.iconPrompt ?? 'memory-orb'),
+      p1: toPanel(raw.p1 || raw.panels?.[0]),
+      p2: toPanel(raw.p2 || raw.panels?.[1]),
+      p3: toPanel(raw.p3 || raw.panels?.[2]),
+      p4: toPanel(raw.p4 || raw.panels?.[3]),
+      p5: toPanel(raw.p5 || raw.panels?.[4]),
+    };
 
     const ok = ['p1', 'p2', 'p3', 'p4', 'p5'].every(
       (k) => normalizedStoryboard[k]?.title && normalizedStoryboard[k]?.description
     );
     if (!ok) {
-      return res.status(502).json({
-        error: 'incomplete_story',
-        preview: text.slice(0, 400),
-      });
+      return res.status(502).json({ error: 'incomplete_story', preview: text.slice(0, 400) });
     }
 
-    console.log('Storyboard JSON (normalized):\n', JSON.stringify(normalizedStoryboard, null, 2));
+    // --- Publish to jsonbin ---
+    const stringContent = JSON.stringify(normalizedStoryboard, null, 2);
 
-    // Publish to the SAME Gist every time
-    const FILENAME = 'story.json';
-    const { gistId, stableRawUrl, htmlUrl } = await publishGist({
-      gistId: process.env.STORY_GIST_ID, // IMPORTANT: keeps the link the same (PATCH)
-      filename: FILENAME,                // constant filename → constant path
-      content: normalizedStoryboard,
+    const jbResp = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': BIN_KEY,
+        'X-Bin-Private': 'false'
+      },
+      body: stringContent
     });
 
-    // Respond: stable public URL (optionally add a cache-buster query on the client)
+    if (!jbResp.ok) {
+      const txt = await jbResp.text();
+      console.error('jsonbin update error:', jbResp.status, txt);
+      return res.status(502).json({ error: 'jsonbin_update_failed', status: jbResp.status, body: txt });
+    }
+
+    const publicUrl = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest?meta=false`;
+
     return res.json({
       ...normalizedStoryboard,
-      publicUrl: stableRawUrl, // e.g., https://gist.githubusercontent.com/<user>/<id>/raw/story.json
-      gistId,                  // same as STORY_GIST_ID
-      gistPage: htmlUrl,       // pretty page
+      publicUrl,
+      previewUrl: `${publicUrl}&t=${Date.now()}`
     });
   } catch (e) {
     console.error('Server error:', e?.message || e);
-    // If the failure was parsing JSON from the model, surface that clearly
-    if (String(e?.message || '').includes('Unexpected')) {
-      return res.status(502).json({ error: 'invalid_json_from_model', message: e.message });
-    }
     return res.status(500).json({ error: 'server_error', message: e?.message || 'unknown' });
-  }
-});
-
-// Optional: proxy that always returns freshest JSON (busts CDN cache)
-app.get('/public/story/latest', async (_req, res) => {
-  try {
-    const user = process.env.GITHUB_USER;
-    const id = process.env.STORY_GIST_ID;
-    if (!user || !id) return res.status(500).json({ error: 'Missing GITHUB_USER or STORY_GIST_ID' });
-
-    const stable = `https://gist.githubusercontent.com/${user}/${id}/raw/story.json?t=${Date.now()}`;
-    const r = await fetch(stable, { redirect: 'follow', cache: 'no-store' });
-    if (!r.ok) return res.status(502).json({ error: 'gist_fetch_failed', status: r.status });
-
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.type('application/json');
-    res.send(await r.text());
-  } catch (e) {
-    res.status(500).json({ error: 'proxy_error', message: String(e) });
   }
 });
 
@@ -207,5 +180,5 @@ app.listen(PORT, () => {
   console.log(`🚀 Storyboard backend`);
   console.log(`📡 Server: http://localhost:${PORT}`);
   console.log(`🧪 Health:  http://localhost:${PORT}/api/ping`);
-  console.log(`🧷 Stable Gist raw: https://gist.githubusercontent.com/${process.env.GITHUB_USER}/${process.env.STORY_GIST_ID}/raw/story.json`);
+  console.log(`🧷 Public JSON: https://api.jsonbin.io/v3/b/${BIN_ID}/latest?meta=false`);
 });

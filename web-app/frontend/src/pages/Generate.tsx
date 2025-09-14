@@ -91,7 +91,7 @@ const Generate = () => {
 
   const handleGenerate = useCallback(async () => {
     if (!description.trim()) {
-      setError('Trip description is required');
+      setError('A description is required');
       return;
     }
 
@@ -192,13 +192,13 @@ const Generate = () => {
               <div className="mb-6">
                 <h2 className="flex items-center gap-3 text-xl font-semibold text-text-primary mb-2">
                   <FileCode className="h-5 w-5 text-foreground" />
-                  Trip Description
+                  Memory Description
                 </h2>
               </div>
               <div className="space-y-6">
                 <div>
                   <label htmlFor="description" className="block text-sm font-medium text-text-primary mb-3">
-                    Tell us about your amazing trip
+                    Tell us about your memories
                   </label>
                   <PremiumTextarea
                     id="description"
@@ -219,7 +219,7 @@ const Generate = () => {
               <div className="mb-6">
                 <h2 className="flex items-center gap-3 text-xl font-semibold text-text-primary mb-2">
                   <Upload className="h-5 w-5 text-foreground" />
-                  Upload {REQUIRED_IMAGES} Travel Photos
+                  Upload {REQUIRED_IMAGES} Photos
                 </h2>
               </div>
               <div>
