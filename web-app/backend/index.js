@@ -20,17 +20,18 @@ const upload = multer({
   limits: { files: 4, fileSize: 5 * 1024 * 1024 },
 });
 
-function buildMessage(blurb, dataUrls) {
+function buildMessage(blurb, dataUrls, theme) {
   const textBlock = {
     type: 'text',
     text: [
       'You are an expert visual storyteller.',
-      'Using the 4 photos and the trip blurb, create a sequential 5-panel storyboard that reads like a mini travel narrative.',
+      'Using the 4 photos, the trip blurb, and the selected visual theme, create a sequential 5-panel storyboard that reads like a mini travel narrative.',
       '',
       'Return ONLY raw JSON (no markdown, no prose, no code fences).',
       'Output EXACTLY in this shape (no extra fields):',
       '{',
-      '  "iconCategory": "short low-poly 3D icon idea for the WHOLE story (e.g., \\"torii gate\\", \\"ramen bowl\\")",',
+      '  "iconCategory": "short low-poly 3D icon idea for the WHOLE story (e.g., \"torii gate\", \"ramen bowl\")",',
+      '  "theme": "the selected visual theme as a string (e.g., Ghibli, Watercolor, Comic, Cyber Punk)",',
       '  "p1": { "title": "...", "description": "..." },',
       '  "p2": { "title": "...", "description": "..." },',
       '  "p3": { "title": "...", "description": "..." },',
@@ -51,6 +52,7 @@ function buildMessage(blurb, dataUrls) {
       "- End p1–p4 with a forward hook. End p5 with a reflective line that ties back to the trip's theme.",
       '',
       `TRIP BLURB: """${blurb}"""`,
+      `SELECTED THEME: "${theme}"`,
     ].join('\n'),
   };
 
@@ -67,9 +69,11 @@ app.get('/api/ping', (_req, res) => res.json({ ok: true }));
 app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
   try {
     const blurb = String(req.body?.blurb || '').trim();
+    const theme = String(req.body?.theme || '').trim();
     const files = req.files || [];
 
     if (!blurb) return res.status(400).json({ error: 'Missing blurb' });
+    if (!theme) return res.status(400).json({ error: 'Missing theme' });
     if (files.length !== 4) return res.status(400).json({ error: 'Please upload exactly 4 images' });
 
     const dataUrls = files.map((file) => {
@@ -80,7 +84,7 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
 
     const body = {
       model: MODEL,
-      messages: buildMessage(blurb, dataUrls),
+      messages: buildMessage(blurb, dataUrls, theme),
       temperature: 0.35,
       max_tokens: 1800,
     };
@@ -121,6 +125,7 @@ app.post('/api/storyboard', upload.array('images', 4), async (req, res) => {
       iconCategory:
         raw.iconCategory || raw.globalIcon || raw.icon ||
         (raw?.p1?.iconPrompt ?? 'memory-orb'),
+      theme: raw.theme || theme,
       p1: toPanel(raw.p1 || raw.panels?.[0]),
       p2: toPanel(raw.p2 || raw.panels?.[1]),
       p3: toPanel(raw.p3 || raw.panels?.[2]),
