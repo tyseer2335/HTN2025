@@ -1,6 +1,8 @@
 import { PinchButton } from "SpectaclesInteractionKit.lspkg/Components/UI/PinchButton/PinchButton";
 import { Snap3DInteractableFactory } from "./Snap3DInteractableFactory";
 import { LSTween } from "LSTween.lspkg/LSTween";
+import { Interactable } from "SpectaclesInteractionKit.lspkg/Components/Interaction/Interactable/Interactable";
+
 /**
  * StoryViewer - Phase 1: Initial Dot Implementation with HTTP Request
  * Single dot appears at starting position when button is clicked, then fetches story data
@@ -79,9 +81,14 @@ export class StoryViewer extends BaseScriptComponent {
   private currentTween: any = null;
   private storyData: any = null;
   private created3DObject: SceneObject = null;
-private rotationTween: LSTween = null;
-private rotationSpeed: number = 30; // degrees per second
-private updateEvent: UpdateEvent = null;
+  private rotationTween: LSTween = null;
+  private rotationSpeed: number = 30; // degrees per second
+  private updateEvent: UpdateEvent = null;
+
+  private manipulateComponent: ManipulateComponent = null;
+  private scaleThreshold: number = 1.5;
+  private initialScale: vec3 = vec3.one(); // Store initial scale
+  private hasTriggeredExpansion: boolean = false; // Prevent multiple triggers
   
   onAwake() {
     // Check internet availability first
@@ -200,18 +207,24 @@ private updateEvent: UpdateEvent = null;
 
 private async generate3DSnap(iconCategory: string) {
   print("StoryViewer: Generating 3D object with icon category: " + iconCategory);
-  this.created3DObject = await this.snap3DFactory.createInteractable3DObject(
-    iconCategory,
-    this.generateButton.getTransform().getWorldPosition().add(this.dotOffset)
-  );
-    
+  
+  try {
+    this.created3DObject = await this.snap3DFactory.createInteractable3DObject(
+      iconCategory,
+      this.generateButton.getTransform().getWorldPosition().add(this.dotOffset)
+    );
     
     if (this.created3DObject) {
-      print("StoryViewer: 3D object created successfully, starting rotation");
-      this.startContinuousRotation(); // Add this line to start rotation
+      print("StoryViewer: 3D object created successfully");
+      this.setupScaleInteraction(this.created3DObject); // Add pinch interaction
+      this.startContinuousRotation(); // Start rotation
     } else {
-      print("StoryViewer: Warning - 3D object creation failed");
+      print("StoryViewer: Warning - Could not find created 3D object");
     }
+  } catch (error) {
+    print("StoryViewer: Error creating 3D object: " + error);
+  }
+  
   this.completePhase1();
 }
 
@@ -242,6 +255,128 @@ private async generate3DSnap(iconCategory: string) {
     }
   });
 }
+  private setupScaleInteraction(sceneObject: SceneObject) {
+  if (!this.created3DObject) {
+    print("StoryViewer: Cannot setup scale interaction - no 3D object");
+    return;
+  }
+  
+  try {
+    // Store the initial scale
+    this.initialScale = this.created3DObject.getTransform().getLocalScale();
+    this.hasTriggeredExpansion = false;
+    
+    // Add Interactable component first
+    const interactable = this.created3DObject.createComponent(Interactable.getTypeName());
+    
+    // Add ManipulateComponent for scale detection
+    this.manipulateComponent = this.created3DObject.createComponent("Component.ManipulateComponent") as ManipulateComponent;
+
+    // Configure the manipulate component
+    this.manipulateComponent.enableManipulateType(ManipulateType.Scale, true);
+    
+    
+
+    this.manipulateComponent.minScale = 0.5; // Minimum 50% of original size
+    this.manipulateComponent.maxScale = 5.0; // Maximum 500% of original size
+
+    print("StoryViewer: Scale interaction setup complete");
+    print("Initial scale: " + this.initialScale.toString());
+    print("Scale threshold: " + this.scaleThreshold);
+  
+    this.setupScaleMonitoring(this.created3DObject);
+
+    print("StoryViewer: ManipulateComponent configured successfully");
+    
+  } catch (error) {
+    print("StoryViewer: Error setting up scale interaction: " + error);
+    // Fallback to simple tap detection
+    this.setupSimpleTapInteraction(sceneObject);
+  }
+}
+
+private setupScaleMonitoring(sceneObject: SceneObject) {
+  // Create an update event to monitor scale changes
+  const scaleMonitorEvent = this.createEvent("UpdateEvent");
+  scaleMonitorEvent.bind(() => {
+    if (!sceneObject || this.hasTriggeredExpansion) return;
+    
+    const currentScale = sceneObject.getTransform().getLocalScale();
+    
+    // Calculate the scale factor relative to initial scale
+    const scaleFactor = currentScale.x / this.initialScale.x; // Use X component as reference
+    
+    // Check if scale exceeds threshold
+    if (scaleFactor >= this.scaleThreshold) {
+      print("StoryViewer: Scale threshold reached! Scale factor: " + scaleFactor);
+      this.onScaleThresholdReached();
+    }
+  });
+}
+
+// Called when scale threshold is reached
+private onScaleThresholdReached() {
+  if (this.hasTriggeredExpansion) return; // Prevent multiple triggers
+  
+  this.hasTriggeredExpansion = true;
+  
+  print("StoryViewer: 3D object scaled big enough!");
+  
+  // Stop rotation when threshold is reached
+  if (this.updateEvent) {
+    this.updateEvent.enabled = false;
+    print("StoryViewer: Rotation stopped");
+  }
+  
+  // // Disable further scaling to prevent interference
+  // if (this.manipulateComponent) {
+  //   this.manipulateComponent.enableScale = false;
+  // }
+
+  
+  // Update status
+  if (this.statusDisplay) {
+    this.statusDisplay.text = "Scale threshold reached! Story expanding...";
+  }
+  
+  // Trigger story expansion
+  this.expandStory();
+}
+
+// Fallback method for devices that don't support ManipulateComponent
+private setupSimpleTapInteraction(sceneObject: SceneObject) {
+  print("StoryViewer: Setting up simple tap interaction as fallback");
+  
+  const tapEvent = this.createEvent("TapEvent");
+  tapEvent.bind(() => {
+    print("StoryViewer: Tap detected, treating as scale trigger");
+    this.onScaleThresholdReached();
+  });
+  
+  print("StoryViewer: Simple tap interaction setup as fallback");
+}
+
+private expandStory() {
+  // This is where you can add whatever functionality you want
+  // when the 3D object is pinched
+  
+  if (this.storyData) {
+    print("StoryViewer: Expanding story with data: " + JSON.stringify(this.storyData));
+    
+    // Example: Show story text
+    if (this.statusDisplay) {
+      this.statusDisplay.text = "Story: " + (this.storyData.title || "Your story here");
+    }
+    
+    // You could also:
+    // - Generate more 3D objects
+    // - Show UI panels
+    // - Trigger animations
+    // - Play audio
+    // - Open the StoryboardViewer component
+  }
+}
+
   
   private completePhase1() {
     this.isAnimating = false;
