@@ -995,7 +995,7 @@ private positionImageHorizontally(displayObject: SceneObject, index: number) {
   if (!displayObject) return;
   
   // Use the exact position from debug output - all images at same location
-  const fixedPosition = new vec3(-5.19027, -9.34762, -53.3637);
+  const fixedPosition = new vec3(2.19027, -9.34762, -53.3637);
   
   displayObject.getTransform().setWorldPosition(fixedPosition);
   
