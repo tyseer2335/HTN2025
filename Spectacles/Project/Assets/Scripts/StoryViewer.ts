@@ -959,35 +959,62 @@ private positionPromptText(textComponent: Text, index: number) {
   print(`StoryViewer: Text ${index + 1} positioned at test location: ${testPosition.toString()}`);
 }
 
+// private positionImageHorizontally(displayObject: SceneObject, index: number) {
+//   if (!displayObject) return;
+  
+//   let basePosition: vec3;
+  
+  
+//   // Get base position from 3D object or button
+//   if (this.created3DObject) {
+//     basePosition = this.created3DObject.getTransform().getWorldPosition();
+//   } else {
+//     basePosition = this.generateButton.getTransform().getWorldPosition();
+//   }
+  
+//   // Calculate horizontal position
+//   // Start from the left and move right for each image
+//   const totalImages = 5;
+//   const startOffset = -(totalImages - 1) * this.horizontalSpacing / 2; // Center the row
+//   const horizontalOffset = startOffset + (index * this.horizontalSpacing);
+  
+//   const finalPosition = basePosition
+//     .add(this.baseImageOffset)
+//     .add(new vec3(horizontalOffset, 0, 0));
+  
+//   displayObject.getTransform().setWorldPosition(finalPosition);
+  
+//   // // Make images face the camera
+//   // const cameraTransform = global.scene.getCameraComponent().getTransform();
+//   // displayObject.getTransform().lookAt(cameraTransform.getWorldPosition(), vec3.up());
+  
+//   print(`StoryViewer: Image ${index + 1} positioned at: ${finalPosition.toString()}`);
+// }
+
 private positionImageHorizontally(displayObject: SceneObject, index: number) {
   if (!displayObject) return;
   
-  let basePosition: vec3;
+  // Use the exact position from debug output - all images at same location
+  const fixedPosition = new vec3(-5.19027, -9.34762, -53.3637);
   
-  // Get base position from 3D object or button
-  if (this.created3DObject) {
-    basePosition = this.created3DObject.getTransform().getWorldPosition();
-  } else {
-    basePosition = this.generateButton.getTransform().getWorldPosition();
-  }
+  displayObject.getTransform().setWorldPosition(fixedPosition);
   
-  // Calculate horizontal position
-  // Start from the left and move right for each image
-  const totalImages = 5;
-  const startOffset = -(totalImages - 1) * this.horizontalSpacing / 2; // Center the row
-  const horizontalOffset = startOffset + (index * this.horizontalSpacing);
+  // // Make images face the camera (optional)
+  // try {
+  //   const camera = global.scene.findFirst("Camera");
+  //   if (camera) {
+  //     displayObject.getTransform().lookAt(camera.getTransform().getWorldPosition(), vec3.up());
+  //   } else {
+  //     const renderCamera = global.scene.getRenderCamera();
+  //     if (renderCamera) {
+  //       displayObject.getTransform().lookAt(renderCamera.getTransform().getWorldPosition(), vec3.up());
+  //     }
+  //   }
+  // } catch (error) {
+  //   print(`StoryViewer: Error making image face camera: ${error}`);
+  // }
   
-  const finalPosition = basePosition
-    .add(this.baseImageOffset)
-    .add(new vec3(horizontalOffset, 0, 0));
-  
-  displayObject.getTransform().setWorldPosition(finalPosition);
-  
-  // // Make images face the camera
-  // const cameraTransform = global.scene.getCameraComponent().getTransform();
-  // displayObject.getTransform().lookAt(cameraTransform.getWorldPosition(), vec3.up());
-  
-  print(`StoryViewer: Image ${index + 1} positioned at: ${finalPosition.toString()}`);
+  print(`StoryViewer: Image ${index + 1} positioned at fixed location: ${fixedPosition.toString()}`);
 }
 
 private async generateImageFromStory(theme: string) {
