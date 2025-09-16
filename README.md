@@ -119,6 +119,5 @@ VITE_STORY_URL=https://api.jsonbin.io/v3/b/<JSONBIN_ID>/latest?meta=false
 
 ## 🔗 Learn More
 
-- 🚀 [Devpost](https://devpost.com/tyseer2334)  
-- 💻 [GitHub](https://github.com/tyseer2335/SpectraSphere)  
-- 🐦 [Twitter](https://twitter.com/tyseer2334)  
+- 🚀 [Devpost](https://devpost.com/tyseer2334)   
+- 🐦 [Twitter](https://x.com/i/status/1967207404816437297)  
