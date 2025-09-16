@@ -2,12 +2,6 @@
 
 🏆 **Winner of the Snap Inc. API Prize at Hack the North 2025** 🏆  
 
-Built with ❤️ by:  
-- [Allen Ng](https://www.linkedin.com/in/allenngkc/)  
-- [Raed Rahman](https://www.linkedin.com/in/raed-rahman-a59073203/)  
-- [Anindya Barua](https://www.linkedin.com/in/abarua99/)  
-- [Tyseer Toufiq](https://www.linkedin.com/in/tyseertoufiq/)  
-
 ---
 
 **SpectraSphere** is a hackathon project built at Hack the North 2025. It transforms a handful of photos and a short trip description into a **five-panel, themed storyboard**. Each story feels like a mini comic flipbook, complete with captions and stylized visuals. You can view and share the generated story as an immersive AR experience.  
@@ -114,6 +108,13 @@ VITE_STORY_URL=https://api.jsonbin.io/v3/b/<JSONBIN_ID>/latest?meta=false
 - Watercolor Travel Journal  
 - Cyberpunk Neon  
 
+---
+
+## 🏗️ Built by:  
+- [Allen Ng](https://www.linkedin.com/in/allenngkc/)  
+- [Raed Rahman](https://www.linkedin.com/in/raed-rahman-a59073203/)  
+- [Anindya Barua](https://www.linkedin.com/in/abarua99/)  
+- [Tyseer Toufiq](https://www.linkedin.com/in/tyseertoufiq/)  
 ---
 
 ## 🔗 Learn More
