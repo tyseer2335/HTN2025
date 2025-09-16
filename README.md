@@ -1,5 +1,15 @@
 # 🌌 SpectraSphere
 
+🏆 **Winner of the Snap Inc. API Prize at Hack the North 2025** 🏆  
+
+Built with ❤️ by:  
+- [Allen Ng](https://www.linkedin.com/in/allenngkc/)  
+- [Raed Rahman](https://www.linkedin.com/in/raed-rahman-a59073203/)  
+- [Anindya Barua](https://www.linkedin.com/in/abarua99/)  
+- [Tyseer Toufiq](https://www.linkedin.com/in/tyseertoufiq/)  
+
+---
+
 **SpectraSphere** is a hackathon project built at Hack the North 2025. It transforms a handful of photos and a short trip description into a **five-panel, themed storyboard**. Each story feels like a mini comic flipbook, complete with captions and stylized visuals. You can view and share the generated story as an immersive AR experience.  
 
 SpectraSphere also integrates with **Snap Spectacles**:  
@@ -21,88 +31,57 @@ SpectraSphere also integrates with **Snap Spectacles**:
 
 ---
 
-## ⚙️ Setup & Installation
+## ⚙️ Setup (Spectacles App)
+
+This repo ships a single runnable app for demos: **`spectacles/`**.  
+No separate backend/frontend needed.  
 
 ### 1. Clone the repo
 ```bash
 git clone https://github.com/your-username/spectrasphere.git
-cd spectrasphere
+cd spectrasphere/spectacles
 ```
 
 ### 2. Install dependencies
-Backend (Express):
 ```bash
-cd backend
-npm install
-```
-
-Frontend (React/Next.js/Vite depending on your setup):
-```bash
-cd frontend
 npm install
 ```
 
 ### 3. Configure environment variables
-Create a `.env` file in `backend/` with:
+Create a `.env` file in `spectacles/` (or use Lenstudio Project Settings) with:
 
 ```env
-COHERE_API_KEY=your_real_cohere_api_key_here
-COHERE_MODEL=c4ai-aya-vision-32b
-
-# Jsonbin configuration
-JSONBIN_ID=68c663ff43b1c97be94262fa
-JSONBIN_KEY=your_real_jsonbin_master_key_here
-
-PORT=8787
+# Public JSON endpoint with your generated story
+VITE_STORY_URL=https://api.jsonbin.io/v3/b/<JSONBIN_ID>/latest?meta=false
 ```
 
-### 4. Run the servers locally
-Backend:
+### 4. Run the app
 ```bash
-cd backend
 npm run dev
 ```
 
-Frontend:
-```bash
-cd frontend
-npm run dev
-```
-
-Now open `http://localhost:3000` (or whatever port your frontend runs on).
+Now open the preview URL (or `http://localhost:3000`) and load the app into Snap Spectacles.
 
 ---
 
-## 💻 Running in Lenstudio
+## 💻 Run in Lenstudio
 
-If you’d rather not set up locally, you can run the project in [Lenstudio](https://lenstudio.dev):
+1. Go to [Lenstudio](https://lenstudio.dev) and **import this repo**  
+   - *New Project* → *Import from GitHub* → paste the repo URL  
 
-1. Go to Lenstudio and **import the GitHub repo**  
-   - Click *New Project* → *Import from GitHub* → paste your repo URL.  
-
-2. Once imported, you’ll have two terminals available:  
-   - `backend/` for the Express server  
-   - `frontend/` for the React app  
-
-3. In the backend terminal, install dependencies and start dev mode:
+2. Open a terminal in Lenstudio and run:
 ```bash
-cd backend
+cd spectacles
 npm install
 npm run dev
 ```
 
-4. In the frontend terminal, install dependencies and run the app:
-```bash
-cd frontend
-npm install
-npm run dev
+3. In **Project Settings → Environment**, add:
+```env
+VITE_STORY_URL=https://api.jsonbin.io/v3/b/<JSONBIN_ID>/latest?meta=false
 ```
 
-5. Configure environment variables in Lenstudio’s **Project Settings** → *Environment*.  
-   Add the same keys you’d put in `.env` (COHERE_API_KEY, JSONBIN_ID, etc.).  
-
-6. Lenstudio will give you **public preview URLs** for both servers.  
-   Use the frontend’s preview URL to open the app in your browser.  
+4. Use the **public preview URL** that Lenstudio provides for `spectacles/`.  
 
 ---
 
@@ -110,24 +89,21 @@ npm run dev
 
 1. **Upload 4 photos** of your trip.  
 2. **Enter a short trip blurb** (e.g. “A weekend at Hack the North coding and exploring Waterloo”).  
-3. Hit **Generate** — Cohere’s model + our backend produce a 5-panel story JSON.  
-4. Story JSON is published to a **stable public Jsonbin URL**:  
-   ```
-   https://api.jsonbin.io/v3/b/<JSONBIN_ID>/latest?meta=false
-   ```
-5. The frontend fetches this JSON and renders it as a flipbook in your chosen theme (Comic, Ghibli, Watercolor, Cyberpunk).  
-6. Open the story in **Snap Spectacles** for a narrated AR flipbook + 3D memory object.
+3. Our backend (Cohere + Jsonbin) generates a 5-panel story JSON.  
+4. That JSON is hosted at a **stable public URL**.  
+5. The **Spectacles app** fetches this JSON and renders it as a flipbook in your chosen theme.  
+6. Open in **Snap Spectacles** for a narrated AR flipbook + floating 3D memory object.  
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** React + Tailwind (themed UI, dark/light modes, animations)  
-- **Backend:** Node.js + Express + Multer (file uploads)  
+- **Frontend:** React + Tailwind (flipbook + themes)  
+- **App Folder:** `spectacles/` (standalone viewer)  
 - **AI Model:** Cohere Aya Vision (`c4ai-aya-vision-32b`)  
-- **Storage:** Jsonbin (stable public JSON endpoint)  
-- **Other Tools:** Lucide icons, custom premium-styled components  
-- **Hardware Integration:** Snap Spectacles (AR viewing, narration, 3D object generation)  
+- **Storage:** Jsonbin (public JSON endpoint)  
+- **Other Tools:** Lucide icons, styled components  
+- **Hardware Integration:** Snap Spectacles (AR narration + 3D object generation)  
 
 ---
 
@@ -138,3 +114,10 @@ npm run dev
 - Watercolor Travel Journal  
 - Cyberpunk Neon  
 
+---
+
+## 🔗 Learn More
+
+- 🚀 [Devpost](https://devpost.com/tyseer2334)  
+- 💻 [GitHub](https://github.com/tyseer2335/SpectraSphere)  
+- 🐦 [Twitter](https://twitter.com/tyseer2334)  
